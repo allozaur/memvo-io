@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Logo from '$lib/components/Logo.svelte';
-	// import RecordButton from '$lib/components/PlaybackRecordButton.svelte';
-	import Recorder from '$lib/components/Recorder.svelte';
+	import Recorder from '$lib/components/Recorder/Recorder.svelte';
 	import RecordingTile from '$lib/components/RecordingTile.svelte';
 
 	let isPaused = $state(false);
@@ -43,7 +42,6 @@
 		place-content: start stretch;
 		gap: 3rem;
 		place-items: center;
-		height: 100vh;
 		padding-top: 2rem;
 	}
 

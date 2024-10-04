@@ -2,10 +2,11 @@
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
 	import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
-	import RecordButtonStart from './RecordButtonStart.svelte';
-	import RecordButtonStop from './RecordButtonStop.svelte';
-	import RecordButtonPause from './RecordButtonPause.svelte';
+	import RecordButtonStart from '../RecordButtonStart.svelte';
+	import RecordButtonStop from '../RecordButtonStop.svelte';
+	import RecordButtonPause from '../RecordButtonPause.svelte';
 	import { browser } from '$app/environment';
+	// import { startRecording, stopRecording, togglePause } from './methods';
 
 	interface RecorderProps {
 		isPaused: boolean;
@@ -15,17 +16,21 @@
 		scrollingWaveform?: boolean;
 	}
 
-	let waveColor = $state(
-		browser && window.matchMedia('(prefers-color-scheme: dark)').matches ? '#ffffff' : '#000000'
-	);
-
 	let {
-		isPaused,
-		isRecording,
+		isPaused = $bindable(),
+		isRecording = $bindable(),
 		micSelect,
 		recordings,
 		scrollingWaveform = true
 	}: RecorderProps = $props();
+
+	let waveColor = $state(
+		browser && window.matchMedia('(prefers-color-scheme: dark)').matches
+			? '#ffffff'
+			: browser && window.matchMedia('(prefers-color-scheme: light)').matches
+				? '#000000'
+				: ''
+	);
 
 	let wavesurfer: WaveSurfer;
 	let progress = $state('00:00');
@@ -59,14 +64,27 @@
 		});
 	}
 
-	function updateProgress(time: number) {
-		const formattedTime = [
-			Math.floor((time % 3600000) / 60000), // minutes
-			Math.floor((time % 60000) / 1000) // seconds
-		]
-			.map((v) => (v < 10 ? '0' + v : v))
-			.join(':');
-		progress = formattedTime;
+	function startRecording() {
+		if (!micSelect.value) {
+			alert('Choose a recording device!');
+			return;
+		}
+
+		if (record.isRecording() || record.isPaused()) {
+			record.stopRecording();
+
+			return;
+		}
+
+		record.startRecording({ deviceId: micSelect.value }).then(() => {
+			isRecording = true;
+		});
+	}
+
+	function stopRecording() {
+		record.stopRecording();
+		isPaused = false;
+		isRecording = false;
 	}
 
 	function togglePause() {
@@ -79,23 +97,14 @@
 		}
 	}
 
-	function startRecording() {
-		if (record.isRecording() || record.isPaused()) {
-			record.stopRecording();
-
-			return;
-		}
-
-		const deviceId = micSelect.value;
-		record.startRecording({ deviceId }).then(() => {
-			isRecording = true;
-		});
-	}
-
-	function stopRecording() {
-		record.stopRecording();
-		isPaused = false;
-		isRecording = false;
+	function updateProgress(time: number) {
+		const formattedTime = [
+			Math.floor((time % 3600000) / 60000), // minutes
+			Math.floor((time % 60000) / 1000) // seconds
+		]
+			.map((v) => (v < 10 ? '0' + v : v))
+			.join(':');
+		progress = formattedTime;
 	}
 
 	onMount(() => {
@@ -115,10 +124,6 @@
 <select bind:this={micSelect}>
 	<option value="" hidden>Select mic</option>
 </select>
-
-<!-- <label style="display:inline-block;">
-	<input type="checkbox" checked={scrollingWaveform} onchange={handleCheckboxChange} /> Scrolling waveform
-</label> -->
 
 <p id="progress">{progress}</p>
 

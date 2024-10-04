@@ -170,7 +170,7 @@ jobs:
         run: pnpm install
 
       - name: Run unit tests
-        run: cd apps/web && pnpm test:integration
+        run: cd apps/web && pnpm test:unit
 
   deployment:
     name: Deploy to Cloudflare Pages

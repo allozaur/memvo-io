@@ -3,17 +3,13 @@
 	import Recorder from '$lib/components/Recorder/Recorder.svelte';
 	import RecordingTile from '$lib/components/RecordingTile.svelte';
 
-	let isPaused = $state(false);
-	let isRecording = $state(false);
-	let micSelect: HTMLSelectElement;
-
 	let recordings: { id: string; name: string; url: string }[] = $state([]);
 </script>
 
 <main>
 	<Logo --size="1.5rem" />
 
-	<Recorder {isPaused} {isRecording} {micSelect} {recordings} />
+	<Recorder {recordings} />
 
 	<div class="current">
 		{#if recordings?.length}

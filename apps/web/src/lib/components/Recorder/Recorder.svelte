@@ -6,24 +6,22 @@
 	import RecordButtonStop from '../RecordButtonStop.svelte';
 	import RecordButtonPause from '../RecordButtonPause.svelte';
 	import { browser } from '$app/environment';
-	// import { startRecording, stopRecording, togglePause } from './methods';
+	import Button from '../Button.svelte';
 
 	interface RecorderProps {
-		isPaused: boolean;
-		isRecording: boolean;
-		micSelect: HTMLSelectElement;
 		recordings: { id: string; name: string; url: string }[];
 		scrollingWaveform?: boolean;
 	}
 
-	let {
-		isPaused = $bindable(),
-		isRecording = $bindable(),
-		micSelect,
-		recordings,
-		scrollingWaveform = true
-	}: RecorderProps = $props();
+	let { recordings, scrollingWaveform = true }: RecorderProps = $props();
 
+	let defaultDeviceId: string | undefined = $state(undefined);
+	let isPaused = $state(false);
+	let isRecording = $state(false);
+	let isStopped = $state(false);
+	let progress = $state('00:00');
+	let record: RecordPlugin = $state({} as RecordPlugin);
+	let recordingUrl = $state('');
 	let waveColor = $state(
 		browser && window.matchMedia('(prefers-color-scheme: dark)').matches
 			? '#ffffff'
@@ -31,10 +29,7 @@
 				? '#000000'
 				: ''
 	);
-
 	let wavesurfer: WaveSurfer;
-	let progress = $state('00:00');
-	let record: any = $state();
 
 	function createWaveSurfer() {
 		if (wavesurfer) {
@@ -42,21 +37,24 @@
 		}
 
 		wavesurfer = WaveSurfer.create({
-			container: '#mic',
+			container: '#wave',
 			waveColor,
-			progressColor: 'rgb(100, 0, 100)'
+			progressColor: '#ddd',
+			cursorColor: '#ddd',
+			height: 100,
+			barWidth: 2,
+			barRadius: 3,
+			backend: 'MediaElement'
 		});
 
 		record = wavesurfer.registerPlugin(
-			RecordPlugin.create({ scrollingWaveform, renderRecordedAudio: false })
+			RecordPlugin.create({ scrollingWaveform, renderRecordedAudio: true })
 		);
 
+		isStopped = true;
+
 		record.on('record-end', (blob: Blob | MediaSource) => {
-			recordings.push({
-				name: new Date().toLocaleString(),
-				id: crypto.randomUUID(),
-				url: URL.createObjectURL(blob)
-			});
+			recordingUrl = URL.createObjectURL(blob);
 		});
 
 		record.on('record-progress', (time: number) => {
@@ -65,26 +63,23 @@
 	}
 
 	function startRecording() {
-		if (!micSelect.value) {
-			alert('Choose a recording device!');
-			return;
-		}
-
 		if (record.isRecording() || record.isPaused()) {
 			record.stopRecording();
-
 			return;
 		}
 
-		record.startRecording({ deviceId: micSelect.value }).then(() => {
+		isStopped = false;
+		record.startRecording({ deviceId: defaultDeviceId }).then(() => {
 			isRecording = true;
 		});
 	}
 
 	function stopRecording() {
 		record.stopRecording();
+
 		isPaused = false;
 		isRecording = false;
+		isStopped = true;
 	}
 
 	function togglePause() {
@@ -94,6 +89,18 @@
 		} else {
 			isPaused = true;
 			record.pauseRecording();
+		}
+	}
+
+	function saveRecording() {
+		if (recordingUrl) {
+			recordings.push({
+				name: new Date().toLocaleString(),
+				id: crypto.randomUUID(),
+				url: recordingUrl
+			});
+
+			recordingUrl = '';
 		}
 	}
 
@@ -107,27 +114,18 @@
 		progress = formattedTime;
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		createWaveSurfer();
 
-		RecordPlugin.getAvailableAudioDevices().then((devices) => {
-			devices.forEach((device) => {
-				const option = document.createElement('option');
-				option.value = device.deviceId;
-				option.text = device.label || device.deviceId;
-				micSelect.appendChild(option);
-			});
-		});
+		const devices = await RecordPlugin.getAvailableAudioDevices();
+
+		defaultDeviceId = devices.find((device) => device.kind === 'audioinput')?.deviceId;
 	});
 </script>
 
-<select bind:this={micSelect}>
-	<option value="" hidden>Select mic</option>
-</select>
-
 <p id="progress">{progress}</p>
 
-<div id="mic"></div>
+<div id="wave"></div>
 
 <div class="controls">
 	{#if isRecording}
@@ -136,8 +134,12 @@
 	{:else if isPaused}
 		<RecordButtonStop onclick={stopRecording} />
 		<RecordButtonStart onclick={togglePause} />
-	{:else}
+	{:else if isStopped}
 		<RecordButtonStart onclick={startRecording} />
+
+		{#if recordingUrl}
+			<Button label="Save" onclick={saveRecording} />
+		{/if}
 	{/if}
 </div>
 
@@ -147,7 +149,7 @@
 		gap: 0.75rem;
 	}
 
-	#mic {
+	#wave {
 		width: 100%;
 	}
 </style>

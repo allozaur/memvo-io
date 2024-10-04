@@ -46,7 +46,7 @@
 
 	<Button kind="primary" onclick={togglePlay} label={isPlaying ? 'Pause' : 'Play'} />
 
-	<Button download="{name}.webm" href={url} label="Download"></Button>
+	<Button download={name} href={url} label="Download"></Button>
 
 	<Button
 		kind="secondary"

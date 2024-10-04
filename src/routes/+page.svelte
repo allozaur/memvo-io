@@ -1,15 +1,14 @@
-<script>
-	let audioUrl = $state('');
+<script lang="ts">
+	import Logo from '$lib/components/Logo.svelte';
+	import RecordingTile from '$lib/components/RecordingTile.svelte';
 
-	/** @type {BlobPart[]} */
-	let chunks = [];
+	let chunks: BlobPart[] = [];
 
 	let isRecording = $state(false);
 
-	/** @type {MediaRecorder | null} */
-	let mediaRecorder = null;
+	let mediaRecorder: MediaRecorder | null = null;
 
-	let recordingName = $state('');
+	let recordings: { id: string; name: string; url: string }[] = $state([]);
 
 	async function startRecording() {
 		try {
@@ -23,7 +22,15 @@
 			mediaRecorder.onstop = () => {
 				const audioBlob = new Blob(chunks, { type: 'audio/webm' });
 				chunks = [];
-				audioUrl = URL.createObjectURL(audioBlob);
+
+				recordings = [
+					{
+						name: new Date().toLocaleString(),
+						id: crypto.randomUUID(),
+						url: URL.createObjectURL(audioBlob)
+					},
+					...recordings
+				];
 			};
 
 			mediaRecorder.start();
@@ -38,24 +45,36 @@
 			mediaRecorder.stop();
 			isRecording = false;
 		}
-
-		recordingName = `recording-${new Date().toISOString()}`;
 	}
 </script>
 
 <main>
+	<Logo />
+
 	{#if isRecording}
 		<button class="stop" onclick={stopRecording}> ⏹</button>
 	{:else}
 		<button class="start" onclick={startRecording}>⏺</button>
 	{/if}
 
-	{#if audioUrl}
-		<div class="recording">
-			<audio controls src={audioUrl}></audio>
+	<div class="current">
+		{#if recordings?.length}
+			<RecordingTile name={recordings[0].name} url={recordings[0].url} {recordings} />
+		{/if}
+	</div>
 
-			<a href={audioUrl} download="{recordingName}.webm">Download Recording</a>
-		</div>
+	{#if recordings.length > 1}
+		<section class="previous-recordings">
+			<h2>Previous Recordings</h2>
+
+			<ul>
+				{#each recordings.slice(1) as { name, url }}
+					<li>
+						<RecordingTile {name} {url} {recordings} />
+					</li>
+				{/each}
+			</ul>
+		</section>
 	{/if}
 </main>
 
@@ -81,19 +100,17 @@
 	}
 
 	.start {
-		background: #f0f0f0;
-		color: red;
+		background: var(--c-body-dark);
+		color: var(--c-accent);
 	}
 
 	.stop {
-		background: red;
+		background: var(--c-accent);
 		color: white;
 	}
 
-	.recording {
-		display: grid;
-		place-content: center;
-		place-items: center;
-		gap: 1rem;
+	ul {
+		list-style: none;
+		padding: 0;
 	}
 </style>

@@ -1,6 +1,14 @@
 :root {
 	--c-body: #faf8f4;
-	--c-body-dark: #edebe8;
+	--c-surface: #edebe8;
 	--c-text: #110d0d;
 	--c-accent: #fe7171;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--c-body: #1d1e1e;
+		--c-surface: #343535;
+		--c-text: #f5f5f5;
+	}
 }

@@ -37,7 +37,8 @@
 	.recording-tile {
 		border: 1px solid #ccc;
 		border-radius: 1.25rem;
-		background: #f4f4f4;
+		background: var(--c-surface);
+		color: var(--c-text);
 		padding: 1rem;
 		display: grid;
 		gap: 1rem;

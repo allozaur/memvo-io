@@ -100,7 +100,7 @@
 	}
 
 	.start {
-		background: var(--c-body-dark);
+		background: var(--c-surface);
 		color: var(--c-accent);
 	}
 

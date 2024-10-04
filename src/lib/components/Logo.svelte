@@ -160,3 +160,11 @@
 		></g
 	></svg
 >
+
+<style>
+	text {
+		/* @media (prefers-color-scheme: dark) { */
+		fill: var(--c-text) !important;
+		/* } */
+	}
+</style>

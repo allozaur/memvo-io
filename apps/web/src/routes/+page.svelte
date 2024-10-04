@@ -52,6 +52,8 @@
 <main>
 	<Logo --height="4rem" />
 
+	<h1>Say it out loud!</h1>
+
 	<RecordButton {isRecording} onclick={isRecording ? stopRecording : startRecording} />
 
 	<div class="current">

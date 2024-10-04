@@ -8,9 +8,29 @@
 </script>
 
 {#if isRecording}
-	<button class="stop" {onclick}> ⏹</button>
+	<button class="stop" {onclick} aria-label="Stop">
+		<svg
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="currentColor"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<rect x="1" y="1" width="22" height="22" />
+		</svg>
+	</button>
 {:else}
-	<button class="start" {onclick}>⏺</button>
+	<button class="start" {onclick} aria-label="Record">
+		<svg
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="currentColor"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<circle cx="12" cy="12" r="12" />
+		</svg>
+	</button>
 {/if}
 
 <style>

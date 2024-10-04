@@ -52,8 +52,6 @@
 <main>
 	<Logo --height="4rem" />
 
-	<h1>Say it out loud!</h1>
-
 	<RecordButton {isRecording} onclick={isRecording ? stopRecording : startRecording} />
 
 	<div class="current">
@@ -81,7 +79,7 @@
 	main {
 		display: grid;
 		place-content: center;
-		gap: 2rem;
+		gap: 3rem;
 		place-items: center;
 		height: 100vh;
 	}

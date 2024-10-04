@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import WaveSurfer from 'wavesurfer.js';
 	import Button from './Button.svelte';
 
 	interface RecordingTileProps {
@@ -8,14 +10,41 @@
 	}
 
 	let { name, url, recordings }: RecordingTileProps = $props();
+	let isPlaying = $state(false);
+	let waveformContainer: HTMLElement;
+	let wavesurfer: WaveSurfer;
+
+	onMount(() => {
+		wavesurfer = WaveSurfer.create({
+			container: waveformContainer,
+			waveColor: '#ddd',
+			progressColor: '#2196f3',
+			cursorColor: '#2196f3',
+			height: 100,
+			barWidth: 2,
+			barRadius: 3,
+			backend: 'MediaElement'
+		});
+
+		// Load audio from the URL
+		wavesurfer.load(url);
+
+		// Cleanup the wavesurfer instance when the component is destroyed
+		return () => wavesurfer.destroy();
+	});
+
+	function togglePlay() {
+		wavesurfer.playPause();
+		isPlaying = !isPlaying;
+	}
 </script>
 
 <div class="recording-tile">
 	<h3>{name}</h3>
 
-	<div>
-		<audio controls src={url}></audio>
-	</div>
+	<div bind:this={waveformContainer}></div>
+
+	<Button kind="primary" onclick={togglePlay} label={isPlaying ? 'Pause' : 'Play'} />
 
 	<Button download="{name}.webm" href={url} label="Download"></Button>
 
@@ -44,4 +73,8 @@
 		gap: 1rem;
 		align-items: start;
 	}
+
+	/* div[bind:this='waveformContainer'] {
+		width: 100%;
+	} */
 </style>

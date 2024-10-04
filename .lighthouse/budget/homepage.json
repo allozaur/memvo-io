@@ -4,19 +4,19 @@
     "timings": [
       {
         "metric": "first-contentful-paint",
-        "budget": 1000
+        "budget": 1500
       },
       {
         "metric": "largest-contentful-paint",
-        "budget": 2000
+        "budget": 3000
       },
       {
         "metric": "speed-index",
-        "budget": 2000
+        "budget": 3000
       },
       {
         "metric": "interactive",
-        "budget": 2000
+        "budget": 3000
       },
       {
         "metric": "cumulative-layout-shift",

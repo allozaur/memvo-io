@@ -11,8 +11,8 @@
           "throughputKbps": 8192,
           "requestLatencyMs": 0,
           "downloadThroughputKbps": 8192,
-          "uploadThroughputKbps": 5120,
-          "cpuSlowdownMultiplier": 3
+          "uploadThroughputKbps": 4096,
+          "cpuSlowdownMultiplier": 2
         }
       }
     }

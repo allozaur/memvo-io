@@ -1,58 +1,20 @@
 <script lang="ts">
 	import Logo from '$lib/components/Logo.svelte';
-	import RecordButton from '$lib/components/RecordButton.svelte';
+	// import RecordButton from '$lib/components/PlaybackRecordButton.svelte';
+	import Recorder from '$lib/components/Recorder.svelte';
 	import RecordingTile from '$lib/components/RecordingTile.svelte';
 
-	let chunks: BlobPart[] = [];
-
+	let isPaused = $state(false);
 	let isRecording = $state(false);
-
-	let mediaRecorder: MediaRecorder | null = null;
+	let micSelect: HTMLSelectElement;
 
 	let recordings: { id: string; name: string; url: string }[] = $state([]);
-
-	async function startRecording() {
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-			mediaRecorder = new MediaRecorder(stream);
-
-			mediaRecorder.ondataavailable = (event) => {
-				chunks.push(event.data);
-			};
-
-			mediaRecorder.onstop = () => {
-				const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-				chunks = [];
-
-				recordings = [
-					{
-						name: new Date().toLocaleString(),
-						id: crypto.randomUUID(),
-						url: URL.createObjectURL(audioBlob)
-					},
-					...recordings
-				];
-			};
-
-			mediaRecorder.start();
-			isRecording = true;
-		} catch (error) {
-			console.error('Error starting recording:', error);
-		}
-	}
-
-	function stopRecording() {
-		if (mediaRecorder && isRecording) {
-			mediaRecorder.stop();
-			isRecording = false;
-		}
-	}
 </script>
 
 <main>
-	<Logo --height="4rem" />
+	<Logo --size="1.5rem" />
 
-	<RecordButton {isRecording} onclick={isRecording ? stopRecording : startRecording} />
+	<Recorder {isPaused} {isRecording} {micSelect} {recordings} />
 
 	<div class="current">
 		{#if recordings?.length}
@@ -78,10 +40,11 @@
 <style>
 	main {
 		display: grid;
-		place-content: center;
+		place-content: start stretch;
 		gap: 3rem;
 		place-items: center;
 		height: 100vh;
+		padding-top: 2rem;
 	}
 
 	ul {

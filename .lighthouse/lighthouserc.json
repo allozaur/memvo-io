@@ -1,0 +1,20 @@
+{
+  "ci": {
+    "collect": {
+      "settings": {
+        "extraHeaders": {
+          "CF-Access-Client-Id": "{{CLIENT_ID}}",
+          "CF-Access-Client-Secret": "{{CLIENT_SECRET}}"
+        },
+        "throttling": {
+          "rttMs": 100,
+          "throughputKbps": 8192,
+          "requestLatencyMs": 0,
+          "downloadThroughputKbps": 8192,
+          "uploadThroughputKbps": 5120,
+          "cpuSlowdownMultiplier": 3
+        }
+      }
+    }
+  }
+}

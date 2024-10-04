@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Logo from '$lib/components/Logo.svelte';
+	import RecordButton from '$lib/components/RecordButton.svelte';
 	import RecordingTile from '$lib/components/RecordingTile.svelte';
 
 	let chunks: BlobPart[] = [];
@@ -49,13 +50,9 @@
 </script>
 
 <main>
-	<Logo />
+	<Logo --height="4rem" />
 
-	{#if isRecording}
-		<button class="stop" onclick={stopRecording}> ⏹</button>
-	{:else}
-		<button class="start" onclick={startRecording}>⏺</button>
-	{/if}
+	<RecordButton {isRecording} onclick={isRecording ? stopRecording : startRecording} />
 
 	<div class="current">
 		{#if recordings?.length}
@@ -85,28 +82,6 @@
 		gap: 2rem;
 		place-items: center;
 		height: 100vh;
-	}
-
-	button {
-		background: none;
-		border: none;
-		border-radius: 100%;
-		font-size: 3rem;
-		height: 3.5rem;
-		width: 3.5rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.start {
-		background: var(--c-surface);
-		color: var(--c-accent);
-	}
-
-	.stop {
-		background: var(--c-accent);
-		color: white;
 	}
 
 	ul {

@@ -25,6 +25,7 @@
 		border-radius: 100%;
 		color: white;
 		cursor: pointer;
+		padding: 0;
 		font-size: 3rem;
 		height: 3.5rem;
 		width: 3.5rem;

@@ -28,6 +28,7 @@
 		cursor: pointer;
 		font-size: 3rem;
 		height: 3.5rem;
+		padding: 0;
 		width: 3.5rem;
 		display: flex;
 		align-items: center;

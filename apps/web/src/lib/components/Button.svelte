@@ -30,6 +30,7 @@
 		border: none;
 		border-radius: 0.5rem;
 		font-size: 1rem;
+		padding: 0;
 		display: inline-flex;
 		justify-content: center;
 		align-items: center;

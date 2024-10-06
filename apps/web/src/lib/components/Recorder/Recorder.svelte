@@ -7,6 +7,7 @@
 	import RecordButtonPause from '../RecordButtonPause.svelte';
 	import { browser } from '$app/environment';
 	import Button from '../Button.svelte';
+	import RecordButtonPlay from '../RecordButtonPlay.svelte';
 
 	interface RecorderProps {
 		recordings: { id: string; name: string; url: string }[];
@@ -62,7 +63,30 @@
 		});
 	}
 
-	function startRecording() {
+	async function deleteRecording() {
+		if (recordingUrl) {
+			URL.revokeObjectURL(recordingUrl);
+			recordingUrl = '';
+			progress = '00:00';
+		}
+	}
+
+	async function startPlayback() {
+		wavesurfer.playPause();
+	}
+
+	async function stopPlayback() {
+		wavesurfer.stop();
+	}
+
+	async function startRecording() {
+		try {
+			await navigator.mediaDevices.getUserMedia({ audio: true });
+			console.log('Microphone permission granted');
+		} catch (err) {
+			console.error('Microphone permission denied', err);
+		}
+
 		if (record.isRecording() || record.isPaused()) {
 			record.stopRecording();
 			return;
@@ -123,23 +147,41 @@
 	});
 </script>
 
-<p id="progress">{progress}</p>
-
-<div id="wave"></div>
+<div class:visible={isRecording || isPaused || recordingUrl} id="wave"></div>
 
 <div class="controls">
 	{#if isRecording}
-		<RecordButtonPause onclick={togglePause} />
+		{#if isPaused}
+			<RecordButtonStart onclick={togglePause} />
+		{:else}
+			<RecordButtonPause onclick={togglePause} />
+		{/if}
+
 		<RecordButtonStop onclick={stopRecording} />
 	{:else if isPaused}
 		<RecordButtonStop onclick={stopRecording} />
 		<RecordButtonStart onclick={togglePause} />
 	{:else if isStopped}
-		<RecordButtonStart onclick={startRecording} />
+		<div class="record">
+			<p id="progress">{progress}</p>
 
-		{#if recordingUrl}
-			<Button label="Save" onclick={saveRecording} />
-		{/if}
+			{#if recordingUrl}
+				<div class="controls">
+					<RecordButtonPlay onclick={startPlayback} />
+
+					<RecordButtonStop onclick={stopPlayback} />
+				</div>
+
+				<div class="recording-actions">
+					<Button label="Save recording" onclick={saveRecording} />
+					<Button label="Delete recording" onclick={deleteRecording} />
+				</div>
+			{:else}
+				<RecordButtonStart onclick={startRecording} />
+
+				<span>Press to start recording</span>
+			{/if}
+		</div>
 	{/if}
 </div>
 
@@ -149,7 +191,26 @@
 		gap: 0.75rem;
 	}
 
+	.record {
+		color: var(--c-text-light);
+		display: grid;
+		justify-items: center;
+		gap: 1rem;
+	}
+
+	.recording-actions {
+		display: flex;
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+
 	#wave {
 		width: 100%;
+		transition: all 0.2ms ease-out;
+
+		&:not(.visible) {
+			opacity: 0;
+			height: 0;
+		}
 	}
 </style>

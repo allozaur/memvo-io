@@ -49,9 +49,17 @@
 
 	.saved-recordings {
 		justify-self: stretch;
-		padding: 1.25rem;
 		max-width: 24rem;
 		width: 100%;
 		margin: auto;
+
+		h2 {
+			padding-inline: 1.125rem;
+			margin-bottom: 1.5rem;
+		}
+
+		ul {
+			padding-inline: 1.125rem;
+		}
 	}
 </style>

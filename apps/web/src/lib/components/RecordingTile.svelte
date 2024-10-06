@@ -64,7 +64,7 @@
 
 <style>
 	.recording-tile {
-		border: 1px solid #ccc;
+		border: 1px solid var(--c-text-light);
 		border-radius: 1.25rem;
 		background: var(--c-surface);
 		color: var(--c-text);

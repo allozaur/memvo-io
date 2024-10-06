@@ -124,6 +124,8 @@
 				url: recordingUrl
 			});
 
+			progress = '00:00';
+
 			recordingUrl = '';
 		}
 	}

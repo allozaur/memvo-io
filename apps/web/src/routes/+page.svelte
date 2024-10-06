@@ -7,22 +7,16 @@
 </script>
 
 <main>
-	<Logo --size="1.5rem" />
+	<Logo --size="1.125rem" />
 
 	<Recorder {recordings} />
 
-	<div class="current">
-		{#if recordings?.length}
-			<RecordingTile name={recordings[0].name} url={recordings[0].url} {recordings} />
-		{/if}
-	</div>
-
-	{#if recordings.length > 1}
-		<section class="previous-recordings">
+	{#if recordings.length}
+		<section class="saved-recordings">
 			<h2>Previous Recordings</h2>
 
 			<ul>
-				{#each recordings.slice(1) as { name, url }}
+				{#each recordings as { name, url }}
 					<li>
 						<RecordingTile {name} {url} {recordings} />
 					</li>
@@ -41,8 +35,23 @@
 		padding-top: 2rem;
 	}
 
+	h2 {
+		font-size: 20px;
+		margin-bottom: 1.5rem;
+	}
+
 	ul {
 		list-style: none;
 		padding: 0;
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	.saved-recordings {
+		justify-self: stretch;
+		padding: 1.25rem;
+		max-width: 24rem;
+		width: 100%;
+		margin: auto;
 	}
 </style>

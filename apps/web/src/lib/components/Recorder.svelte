@@ -133,6 +133,8 @@
 			progress = '00:00';
 
 			recordingUrl = '';
+
+			wavesurfer.empty();
 		}
 	}
 
@@ -148,6 +150,7 @@
 
 	onMount(() => {
 		createWaveSurfer();
+		wavesurfer.empty();
 	});
 </script>
 

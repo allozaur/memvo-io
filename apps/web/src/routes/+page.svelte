@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Logo from '$lib/components/Logo.svelte';
-	import Recorder from '$lib/components/Recorder/Recorder.svelte';
+	import Recorder from '$lib/components/Recorder.svelte';
 	import RecordingTile from '$lib/components/RecordingTile.svelte';
 
 	let recordings: { id: string; name: string; url: string }[] = $state([]);

@@ -1,13 +1,14 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
 	import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
-	import RecordButtonStart from '../RecordButtonStart.svelte';
-	import RecordButtonStop from '../RecordButtonStop.svelte';
-	import RecordButtonPause from '../RecordButtonPause.svelte';
-	import { browser } from '$app/environment';
-	import Button from '../Button.svelte';
-	import RecordButtonPlay from '../RecordButtonPlay.svelte';
+
+	import Button from './Button.svelte';
+	import ButtonPause from './ButtonPause.svelte';
+	import ButtonPlay from './ButtonPlay.svelte';
+	import ButtonRecord from './ButtonRecord.svelte';
+	import ButtonStop from './ButtonStop.svelte';
 
 	interface RecorderProps {
 		recordings: { id: string; name: string; url: string }[];
@@ -93,6 +94,11 @@
 		}
 
 		isStopped = false;
+
+		const devices = await RecordPlugin.getAvailableAudioDevices();
+
+		defaultDeviceId = devices.find((device) => device.kind === 'audioinput')?.deviceId;
+
 		record.startRecording({ deviceId: defaultDeviceId }).then(() => {
 			isRecording = true;
 		});
@@ -140,38 +146,36 @@
 		progress = formattedTime;
 	}
 
-	onMount(async () => {
+	onMount(() => {
 		createWaveSurfer();
-
-		const devices = await RecordPlugin.getAvailableAudioDevices();
-
-		defaultDeviceId = devices.find((device) => device.kind === 'audioinput')?.deviceId;
 	});
 </script>
 
-<div class:visible={isRecording || isPaused || recordingUrl} id="wave"></div>
+<div id="wave"></div>
 
 <div class="controls">
 	{#if isRecording}
-		{#if isPaused}
-			<RecordButtonStart onclick={togglePause} />
-		{:else}
-			<RecordButtonPause onclick={togglePause} />
-		{/if}
-
-		<RecordButtonStop onclick={stopRecording} />
-	{:else if isPaused}
-		<RecordButtonStop onclick={stopRecording} />
-		<RecordButtonStart onclick={togglePause} />
-	{:else if isStopped}
 		<div class="record">
 			<p id="progress">{progress}</p>
 
+			<div class="controls">
+				{#if isPaused}
+					<ButtonRecord onclick={togglePause} />
+				{:else}
+					<ButtonPause onclick={togglePause} />
+				{/if}
+
+				<ButtonStop onclick={stopRecording} />
+			</div>
+		</div>
+	{:else if isStopped}
+		<div class="record">
+			<p id="progress">{progress}</p>
 			{#if recordingUrl}
 				<div class="controls">
-					<RecordButtonPlay onclick={startPlayback} />
+					<ButtonPlay onclick={startPlayback} />
 
-					<RecordButtonStop onclick={stopPlayback} />
+					<ButtonStop onclick={stopPlayback} />
 				</div>
 
 				<div class="recording-actions">
@@ -179,7 +183,7 @@
 					<Button label="Delete recording" onclick={deleteRecording} />
 				</div>
 			{:else}
-				<RecordButtonStart onclick={startRecording} />
+				<ButtonRecord onclick={startRecording} />
 
 				<span>Press to start recording</span>
 			{/if}
@@ -209,10 +213,5 @@
 	#wave {
 		width: 100%;
 		transition: all 0.2ms ease-out;
-
-		&:not(.visible) {
-			opacity: 0;
-			height: 0;
-		}
 	}
 </style>

@@ -231,7 +231,7 @@ jobs:
           temporaryPublicStorage: true
           
   lighthouse-record:
-    name: Audit Homepage with Lighthouse
+    name: Audit Record with Lighthouse
     env:
       APP_DOMAIN: memvo.pages.dev
     runs-on: ubuntu-latest

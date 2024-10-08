@@ -1,65 +1,42 @@
-<script lang="ts">
-	import Logo from '$lib/components/Logo.svelte';
-	import Recorder from '$lib/components/Recorder.svelte';
-	import RecordingTile from '$lib/components/RecordingTile.svelte';
-
-	let recordings: { id: string; name: string; url: string }[] = $state([]);
+<script>
+	import Button from '$lib/components/Button.svelte';
 </script>
 
 <main>
-	<Logo --size="1.125rem" />
+	<div class="hero">
+		<h1>
+			Record, transcribe and share.
+			<br />
+			<strong>It's that simple.</strong>
+		</h1>
 
-	<Recorder {recordings} />
-
-	{#if recordings.length}
-		<section class="saved-recordings">
-			<h2>Previous Recordings</h2>
-
-			<ul>
-				{#each recordings as { name, url }}
-					<li>
-						<RecordingTile {name} {url} {recordings} />
-					</li>
-				{/each}
-			</ul>
-		</section>
-	{/if}
+		<Button href="/record" label="Get started" />
+	</div>
 </main>
 
 <style>
-	main {
+	.hero {
 		display: grid;
-		place-content: start stretch;
-		gap: 3rem;
+		gap: 3.5rem;
+		padding-block: 4rem;
 		place-items: center;
-		padding-top: 2rem;
+		text-align: center;
 	}
 
-	h2 {
-		font-size: 20px;
-		margin-bottom: 1.5rem;
+	h1 {
+		font-size: 2.5rem;
+		line-height: 1.5;
+		font-weight: 600;
 	}
 
-	ul {
-		list-style: none;
-		padding: 0;
-		display: grid;
-		gap: 1.5rem;
+	strong {
+		color: var(--c-accent);
+		font-weight: 600;
 	}
 
-	.saved-recordings {
-		justify-self: stretch;
-		max-width: 24rem;
-		width: 100%;
-		margin: auto;
-
-		h2 {
-			padding-inline: 1.125rem;
-			margin-bottom: 1.5rem;
-		}
-
-		ul {
-			padding-inline: 1.125rem;
+	@media (min-width: 768px) {
+		h1 {
+			font-size: 3rem;
 		}
 	}
 </style>

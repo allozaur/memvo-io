@@ -1,0 +1,63 @@
+<script lang="ts">
+	import Logo from '$lib/components/Logo.svelte';
+	import Recorder from '$lib/components/Recorder.svelte';
+	import RecordingTile from '$lib/components/RecordingTile.svelte';
+
+	let recordings: { id: string; name: string; url: string }[] = $state([]);
+</script>
+
+<main>
+	<Recorder {recordings} />
+
+	{#if recordings.length}
+		<section class="saved-recordings">
+			<h2>Previous Recordings</h2>
+
+			<ul>
+				{#each recordings as { name, url }}
+					<li>
+						<RecordingTile {name} {url} {recordings} />
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
+</main>
+
+<style>
+	main {
+		display: grid;
+		place-content: start stretch;
+		gap: 3rem;
+		place-items: center;
+		padding-top: 2rem;
+	}
+
+	h2 {
+		font-size: 20px;
+		margin-bottom: 1.5rem;
+	}
+
+	ul {
+		list-style: none;
+		padding: 0;
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	.saved-recordings {
+		justify-self: stretch;
+		max-width: 24rem;
+		width: 100%;
+		margin: auto;
+
+		h2 {
+			padding-inline: 1.125rem;
+			margin-bottom: 1.5rem;
+		}
+
+		ul {
+			padding-inline: 1.125rem;
+		}
+	}
+</style>

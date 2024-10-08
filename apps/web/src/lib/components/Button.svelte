@@ -30,17 +30,19 @@
 		border: none;
 		border-radius: 0.5rem;
 		font-size: 1rem;
-		padding: 0;
+		padding: 0.75rem 1rem;
+		border-radius: 1.5rem;
 		display: inline-flex;
 		justify-content: center;
 		align-items: center;
-		padding: 0.75rem;
+		padding: 0.75rem 1.25rem;
 		text-decoration: none;
+		font-weight: 600;
 	}
 
 	.primary {
-		background-color: #403a35;
-		color: #eee;
+		background-color: var(--c-surface);
+		color: var(--c-text);
 	}
 
 	.secondary {

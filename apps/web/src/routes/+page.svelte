@@ -18,15 +18,29 @@
 	.hero {
 		display: grid;
 		gap: 3.5rem;
-		padding-block: 4rem;
+		padding-block: 2.5rem;
 		place-items: center;
 		text-align: center;
+
+		@media (width >= 768px) {
+			padding-block: 4rem;
+		}
 	}
 
 	h1 {
-		font-size: 2.5rem;
+		font-size: 2rem;
 		line-height: 1.5;
 		font-weight: 600;
+		margin: 0;
+
+		@media (width < 768px) {
+			br {
+				display: none;
+			}
+		}
+		@media (width >= 768px) {
+			font-size: 2.5rem;
+		}
 	}
 
 	strong {

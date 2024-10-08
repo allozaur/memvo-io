@@ -4,7 +4,7 @@
 		href?: string;
 		onclick?: () => void;
 		label: string;
-		kind?: 'primary' | 'secondary';
+		kind?: 'primary' | 'secondary' | 'danger';
 	}
 
 	let { download, href, kind = 'primary', label, onclick }: ButtonProps = $props();
@@ -43,6 +43,11 @@
 	.primary {
 		background-color: var(--c-surface);
 		color: var(--c-text);
+	}
+
+	.danger {
+		background-color: var(--bg-error);
+		color: var(--c-error);
 	}
 
 	.secondary {

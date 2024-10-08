@@ -34,7 +34,9 @@
 	}
 
 	h2 {
-		font-size: 20px;
+		font-size: 1.125rem;
+		color: var(--c-text-light);
+		font-weight: 600;
 		margin-bottom: 1.5rem;
 	}
 
@@ -47,17 +49,12 @@
 
 	.saved-recordings {
 		justify-self: stretch;
-		max-width: 24rem;
 		width: 100%;
 		margin: auto;
 
 		h2 {
 			padding-inline: 1.125rem;
 			margin-bottom: 1.5rem;
-		}
-
-		ul {
-			padding-inline: 1.125rem;
 		}
 	}
 </style>

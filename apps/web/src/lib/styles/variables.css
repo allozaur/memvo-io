@@ -5,6 +5,8 @@
 	--c-text-light: #958d8d;
 	--c-text: #110d0d;
 	--c-accent: #fe7171;
+	--c-error: #fb3131;
+	--bg-error: #fb313120;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -44,34 +44,44 @@
 
 	<div bind:this={waveformContainer}></div>
 
-	<Button kind="primary" onclick={togglePlay} label={isPlaying ? 'Pause' : 'Play'} />
+	<div class="actions">
+		<Button kind="primary" onclick={togglePlay} label={isPlaying ? 'Pause' : 'Play'} />
 
-	<Button download={name} href={url} label="Download"></Button>
+		<Button download={name} href={url} label="Download"></Button>
 
-	<Button
-		kind="secondary"
-		onclick={() => {
-			if (confirm('Do you want to delete this recording?')) {
-				recordings.splice(
-					recordings.findIndex((r) => r.name === name),
-					1
-				);
-			}
-		}}
-		label="Delete"
-	/>
+		<Button
+			kind="danger"
+			onclick={() => {
+				if (confirm('Do you want to delete this recording?')) {
+					recordings.splice(
+						recordings.findIndex((r) => r.name === name),
+						1
+					);
+				}
+			}}
+			label="Delete"
+		/>
+	</div>
 </div>
 
 <style>
 	.recording-tile {
-		border: 1px solid var(--c-text-light);
-		border-radius: 1.25rem;
-		background: var(--c-surface);
+		background: var(--c-body-dark);
 		color: var(--c-text);
-		padding: 1rem;
+		/* padding: 1rem; */
 		display: grid;
 		gap: 1rem;
 		align-items: start;
+	}
+
+	h3 {
+		padding: 1rem;
+	}
+
+	.actions {
+		padding: 1rem;
+		display: grid;
+		gap: 1rem;
 	}
 
 	/* div[bind:this='waveformContainer'] {

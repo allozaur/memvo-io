@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
 	import Button from './Button.svelte';
+	import { browser } from '$app/environment';
 
 	interface RecordingTileProps {
 		name: string;
@@ -13,13 +14,20 @@
 	let isPlaying = $state(false);
 	let waveformContainer: HTMLElement;
 	let wavesurfer: WaveSurfer;
+	let waveColor = $state(
+		browser && window.matchMedia('(prefers-color-scheme: dark)').matches
+			? '#ffffff'
+			: browser && window.matchMedia('(prefers-color-scheme: light)').matches
+				? '#000000'
+				: ''
+	);
 
 	onMount(() => {
 		wavesurfer = WaveSurfer.create({
 			container: waveformContainer,
-			waveColor: '#ddd',
-			progressColor: '#2196f3',
-			cursorColor: '#2196f3',
+			waveColor,
+			progressColor: '#ddd',
+			cursorColor: '#ddd',
 			height: 100,
 			barWidth: 2,
 			barRadius: 3,

@@ -31,13 +31,6 @@
 		padding-top: 2rem;
 	}
 
-	h2 {
-		font-size: 1.125rem;
-		color: var(--c-text-light);
-		font-weight: 600;
-		margin-bottom: 1.5rem;
-	}
-
 	ul {
 		list-style: none;
 		padding: 0;

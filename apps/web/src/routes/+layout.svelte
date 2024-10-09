@@ -4,6 +4,6 @@
 	import '$lib/styles/index.css';
 </script>
 
-<Header hideMobile={$page.params.record !== null} />
+<Header hideMobile={$page.params.record !== undefined} />
 
 <slot />

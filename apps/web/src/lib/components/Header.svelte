@@ -27,11 +27,21 @@
 	header {
 		height: 5rem;
 		display: grid;
-		grid-template-columns: 1fr auto 1fr;
 		place-items: center;
+
+		@media (width >= 768px) {
+			grid-template-columns: 1fr auto 1fr;
+		}
 	}
 
 	.hide-mobile {
+		@media (width < 768px) {
+			display: none;
+		}
+	}
+
+	.left,
+	.right {
 		@media (width < 768px) {
 			display: none;
 		}

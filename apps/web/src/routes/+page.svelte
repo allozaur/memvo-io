@@ -23,7 +23,7 @@
 <style>
 	.hero {
 		display: grid;
-		gap: 3.5rem;
+		gap: 2.5rem;
 		padding-block: 2.5rem;
 		place-items: center;
 		text-align: center;
@@ -36,14 +36,16 @@
 	.hero .text {
 		display: grid;
 		gap: 1rem;
+		padding: 1.5rem;
 	}
 
 	.hero p {
 		font-size: 1.125rem;
+		line-height: 1.5;
 	}
 
 	h1 {
-		font-size: 2rem;
+		font-size: 1.875rem;
 		line-height: 1.5;
 		font-weight: 600;
 		margin: 0;

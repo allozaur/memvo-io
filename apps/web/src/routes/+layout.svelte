@@ -31,10 +31,15 @@
 		{/if}
 	{:else}
 		{#snippet leftIcon()}
-			<Logo name="google" --size="1.5rem" />
+			<Logo name="google" --size="1.25rem" />
 		{/snippet}
 
-		<Button href="/sign-in-with-google" {leftIcon} label="Sign in with Google" size="sm" />
+		<Button
+			href="/sign-in-with-google?next={encodeURIComponent($page.url.href)}"
+			{leftIcon}
+			label="Sign in with Google"
+			size="sm"
+		/>
 	{/if}
 {/snippet}
 

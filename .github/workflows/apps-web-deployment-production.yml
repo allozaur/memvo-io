@@ -1,4 +1,4 @@
-name: '[DEPLOYMENT] @resider/web (Production)'
+name: '[DEPLOYMENT] @memvo/web (Production)'
 
 on:
   push:

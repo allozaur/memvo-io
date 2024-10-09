@@ -1,25 +1,30 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+	import type { Snippet } from 'svelte';
 	import Button from './Button.svelte';
 	import Logo from './Logo.svelte';
 
 	interface HeaderProps {
 		hideMobile?: boolean;
+		rightContent?: Snippet;
 	}
 
-	const { hideMobile }: HeaderProps = $props();
+	let { hideMobile, rightContent }: HeaderProps = $props();
 </script>
 
 <header class:hide-mobile={hideMobile}>
 	<div class="left"></div>
 
 	<div class="center">
-		<a href="/">
+		<a class="header-logo" href="/">
 			<Logo --size="1.125rem" />
 		</a>
 	</div>
 
 	<div class="right">
-		<Button label="Sign in" size="sm" />
+		{#if rightContent}
+			{@render rightContent()}
+		{/if}
 	</div>
 </header>
 
@@ -45,5 +50,9 @@
 		@media (width < 768px) {
 			display: none;
 		}
+	}
+
+	.header-logo :global(path) {
+		fill: var(--c-text);
 	}
 </style>

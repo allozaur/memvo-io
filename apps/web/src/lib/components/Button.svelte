@@ -1,14 +1,27 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
 	interface ButtonProps {
 		download?: string;
 		href?: string;
 		onclick?: () => void;
 		label: string;
+		leftIcon?: Snippet;
 		kind?: 'primary' | 'secondary' | 'danger';
+		rightIcon?: Snippet;
 		size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 	}
 
-	let { download, href, kind = 'primary', label, onclick, size = 'md' }: ButtonProps = $props();
+	let {
+		download,
+		href,
+		kind = 'primary',
+		label,
+		leftIcon,
+		onclick,
+		rightIcon,
+		size = 'md'
+	}: ButtonProps = $props();
 </script>
 
 {#snippet inner()}
@@ -17,21 +30,37 @@
 
 {#if href}
 	<a class="button {kind} {size}" {download} {href} {onclick}>
+		{#if leftIcon}
+			{@render leftIcon()}
+		{/if}
+
 		{@render inner()}
+
+		{#if rightIcon}
+			{@render rightIcon()}
+		{/if}
 	</a>
 {:else}
 	<button class="button {kind} {size}" {onclick}>
+		{#if leftIcon}
+			{@render leftIcon()}
+		{/if}
 		{@render inner()}
+		{#if rightIcon}
+			{@render rightIcon()}
+		{/if}
 	</button>
 {/if}
 
 <style>
 	.button {
+		background: var(--background, var(--background-preset));
 		cursor: pointer;
 		border: none;
 		border-radius: 0.5rem;
 		font-size: 1rem;
 		display: inline-flex;
+		gap: 0.5rem;
 		justify-content: center;
 		align-items: center;
 		text-decoration: none;
@@ -64,17 +93,17 @@
 	}
 
 	.primary {
-		background-color: var(--c-surface-2);
+		--background-preset: var(--c-surface-2);
 		color: var(--c-text);
 	}
 
 	.danger {
-		background-color: var(--bg-error);
+		--background-preset: var(--bg-error);
 		color: var(--c-error);
 	}
 
 	.secondary {
-		background-color: var(--c-surface-1);
+		--background-preset: var(--c-surface-1);
 		color: var(--c-text);
 	}
 </style>

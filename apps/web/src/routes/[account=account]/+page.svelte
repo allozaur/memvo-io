@@ -1,0 +1,30 @@
+<script>
+	import { page } from '$app/stores';
+	import RecordingTile from '$lib/components/RecordingTile.svelte';
+</script>
+
+<main>
+	<h1>Hello, {$page.data?.session?.user?.user_metadata.name}</h1>
+
+	<section>
+		<h2>Your recordings</h2>
+
+		<ul>
+			{#each $page.data.recordings as { name, url }}
+				<li>
+					<RecordingTile {name} {url} recordings={$page.data.recordings} />
+				</li>
+			{/each}
+		</ul>
+	</section>
+</main>
+
+<style>
+	main {
+		max-width: 60rem;
+		margin: auto;
+		display: grid;
+		gap: 2rem;
+		justify-items: start;
+	}
+</style>

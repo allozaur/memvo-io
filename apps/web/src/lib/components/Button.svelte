@@ -41,7 +41,7 @@
 	}
 
 	.primary {
-		background-color: var(--c-surface);
+		background-color: var(--c-surface-2);
 		color: var(--c-text);
 	}
 
@@ -51,7 +51,7 @@
 	}
 
 	.secondary {
-		background-color: #9a9fa4;
-		color: white;
+		background-color: var(--c-surface-1);
+		color: var(--c-text);
 	}
 </style>

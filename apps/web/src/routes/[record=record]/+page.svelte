@@ -10,9 +10,7 @@
 	<Recorder {recordings} />
 
 	{#if recordings.length}
-		<section class="saved-recordings">
-			<h2>Previous Recordings</h2>
-
+		<section class="recordings">
 			<ul>
 				{#each recordings as { name, url }}
 					<li>
@@ -47,14 +45,9 @@
 		gap: 1.5rem;
 	}
 
-	.saved-recordings {
+	.recordings {
 		justify-self: stretch;
 		width: 100%;
 		margin: auto;
-
-		h2 {
-			padding-inline: 1.125rem;
-			margin-bottom: 1.5rem;
-		}
 	}
 </style>

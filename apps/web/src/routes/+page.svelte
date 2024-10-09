@@ -4,11 +4,17 @@
 
 <main>
 	<div class="hero">
-		<h1>
-			Record, transcribe and share.
-			<br />
-			<strong>It's that simple.</strong>
-		</h1>
+		<div class="text">
+			<h1>
+				Record, transcribe and publish.
+				<br />
+				<strong>It's that simple.</strong>
+			</h1>
+
+			<p>
+				The easiest way to instantly get your ideas, interviews and conversations to Google Docs.
+			</p>
+		</div>
 
 		<Button href="/record" label="Get started" />
 	</div>
@@ -25,6 +31,15 @@
 		@media (width >= 768px) {
 			padding-block: 4rem;
 		}
+	}
+
+	.hero .text {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.hero p {
+		font-size: 1.125rem;
 	}
 
 	h1 {

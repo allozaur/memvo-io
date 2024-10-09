@@ -55,7 +55,7 @@
 	<div class="actions">
 		<Button kind="primary" onclick={togglePlay} label={isPlaying ? 'Pause' : 'Play'} />
 
-		<Button download={name} href={url} label="Download"></Button>
+		<Button kind="secondary" download={name} href={url} label="Download"></Button>
 
 		<Button
 			kind="danger"
@@ -89,7 +89,14 @@
 	.actions {
 		padding: 1rem;
 		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(max(10rem, calc((100vw - 4rem) / 3)), 1fr));
 		gap: 1rem;
+
+		@media (width < 768px) {
+			:global(.button):first-child {
+				grid-column: 1 / -1;
+			}
+		}
 	}
 
 	/* div[bind:this='waveformContainer'] {

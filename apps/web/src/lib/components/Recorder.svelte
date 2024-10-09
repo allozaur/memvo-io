@@ -183,7 +183,8 @@
 
 				<div class="recording-actions">
 					<Button label="Save recording" onclick={saveRecording} />
-					<Button label="Delete recording" onclick={deleteRecording} />
+
+					<Button kind="danger" label="Delete recording" onclick={deleteRecording} />
 				</div>
 			{:else}
 				<ButtonRecord onclick={startRecording} />

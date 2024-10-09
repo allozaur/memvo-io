@@ -21,7 +21,7 @@
 
 <style>
 	button {
-		background: var(--c-surface);
+		background: var(--c-surface-1);
 		border: none;
 		border-radius: 100%;
 		color: var(--c-accent);

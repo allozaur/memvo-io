@@ -2,6 +2,15 @@
 	import Button from '$lib/components/Button.svelte';
 </script>
 
+<svelte:head>
+	<title>Memvo — Share or publish recordings with transcriptions</title>
+
+	<meta
+		name="description"
+		content="Instant recordings 🔴 with transcriptions 📝 that you can publish 📤 to Google Docs."
+	/>
+</svelte:head>
+
 <main>
 	<div class="hero">
 		<div class="text">

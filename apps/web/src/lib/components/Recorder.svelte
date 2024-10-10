@@ -9,13 +9,14 @@
 	import ButtonPlay from './ButtonPlay.svelte';
 	import ButtonRecord from './ButtonRecord.svelte';
 	import ButtonStop from './ButtonStop.svelte';
+	import { page } from '$app/stores';
+	import { invalidate } from '$app/navigation';
 
 	interface RecorderProps {
-		recordings: { id: string; name: string; url: string }[];
 		scrollingWaveform?: boolean;
 	}
 
-	let { recordings, scrollingWaveform = true }: RecorderProps = $props();
+	let { scrollingWaveform = true }: RecorderProps = $props();
 
 	let defaultDeviceId: string | undefined = $state(undefined);
 	let isPaused = $state(false);
@@ -69,6 +70,7 @@
 			URL.revokeObjectURL(recordingUrl);
 			recordingUrl = '';
 			progress = '00:00';
+			wavesurfer.empty();
 		}
 	}
 
@@ -122,19 +124,52 @@
 		}
 	}
 
-	function saveRecording() {
+	async function saveRecording() {
 		if (recordingUrl) {
-			recordings.push({
-				name: new Date().toLocaleString(),
-				id: crypto.randomUUID(),
-				url: recordingUrl
-			});
+			const response = await fetch(recordingUrl);
+			const blob = await response.blob();
+			const userId = $page.data.user?.id;
 
-			progress = '00:00';
+			if (userId) {
+				const fileName = `${new Date().toISOString()}-${crypto.randomUUID()}.webm`;
+				const filePath = `${userId}/${fileName}`;
 
-			recordingUrl = '';
+				const { error: uploadError } = await $page.data.supabase.storage
+					.from('user_recordings_audio_files')
+					.upload(filePath, blob, {
+						contentType: 'audio/webm'
+					});
 
-			wavesurfer.empty();
+				if (uploadError) {
+					console.error('Error uploading file:', uploadError.message);
+					return;
+				}
+
+				const transcription = 'Transcription text here';
+
+				const { error: insertError } = await $page.data.supabase.from('user_recordings').insert([
+					{
+						id: crypto.randomUUID(),
+						created_at: new Date().toISOString(),
+						user_id: userId,
+						audio_file_name: fileName,
+						transcription: transcription
+					}
+				]);
+
+				if (insertError) {
+					console.error('Error inserting record into database:', insertError.message);
+					return;
+				}
+
+				progress = '00:00';
+				recordingUrl = '';
+				wavesurfer.empty();
+
+				await invalidate('get_user_recordings');
+			} else {
+				alert('You must be logged in to save recordings');
+			}
 		}
 	}
 

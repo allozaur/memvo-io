@@ -1,20 +1,50 @@
 <script lang="ts">
-	import Logo from '$lib/components/Logo.svelte';
+	import { invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
 	import Recorder from '$lib/components/Recorder.svelte';
 	import RecordingTile from '$lib/components/RecordingTile.svelte';
 
-	let recordings: { id: string; name: string; url: string }[] = $state([]);
+	async function deleteRecording(id: string, user_id: string, audio_file_name: string) {
+		if (confirm('Are you sure you want to delete this recording?')) {
+			const { error: storageError } = await $page.data.supabase.storage
+				.from('user_recordings_audio_files')
+				.remove([`${user_id}/${audio_file_name}`]);
+
+			if (storageError) {
+				console.error('Storage error:', storageError);
+				return;
+			}
+
+			const { error } = await $page.data.supabase.from('user_recordings').delete().eq('id', id);
+
+			if (error) {
+				console.error('Database error:', error);
+			} else {
+				invalidate('get_user_recordings');
+			}
+		}
+	}
 </script>
 
 <main>
-	<Recorder {recordings} />
+	<Recorder />
 
-	{#if recordings.length}
+	{#if $page.data.recordings.length}
 		<section class="recordings">
 			<ul>
-				{#each recordings as { name, url }}
+				{#each $page.data.recordings as { id, name, transcription, url, user_id }}
 					<li>
-						<RecordingTile {name} {url} {recordings} />
+						<RecordingTile
+							deleteRecording={async () => {
+								const audio_file_name = new URL(url).pathname.split('/').pop();
+
+								await deleteRecording(id, user_id, `${audio_file_name}`);
+							}}
+							{id}
+							{name}
+							{transcription}
+							{url}
+						/>
 					</li>
 				{/each}
 			</ul>

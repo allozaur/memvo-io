@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
-	import Button from './Button.svelte';
 	import Logo from './Logo.svelte';
 
 	interface HeaderProps {
@@ -13,7 +11,9 @@
 </script>
 
 <header class:hide-mobile={hideMobile}>
-	<div class="left"></div>
+	<div class="left">
+		<span>&nbsp;</span>
+	</div>
 
 	<div class="center">
 		<a class="header-logo" href="/">
@@ -32,10 +32,11 @@
 	header {
 		height: 5rem;
 		display: grid;
-		place-items: center;
+		align-items: center;
+		padding-inline: 1rem;
 
 		@media (width >= 768px) {
-			grid-template-columns: 1fr auto 1fr;
+			grid-template-columns: 1fr 1fr 1fr;
 		}
 	}
 
@@ -43,6 +44,14 @@
 		@media (width < 768px) {
 			display: none;
 		}
+	}
+
+	.center {
+		justify-self: center;
+	}
+
+	.right {
+		justify-self: end;
 	}
 
 	.left,

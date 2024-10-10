@@ -10,9 +10,9 @@
 		<h2>Your recordings</h2>
 
 		<ul>
-			{#each $page.data.recordings as { name, url }}
+			{#each $page.data.recordings as { id, name, transcription, url }}
 				<li>
-					<RecordingTile {name} {url} recordings={$page.data.recordings} />
+					<RecordingTile {id} {name} {transcription} {url} recordings={$page.data.recordings} />
 				</li>
 			{/each}
 		</ul>

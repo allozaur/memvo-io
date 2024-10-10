@@ -5,12 +5,14 @@
 	import { browser } from '$app/environment';
 
 	interface RecordingTileProps {
+		deleteRecording: () => Promise<void>;
+		id: string;
 		name: string;
+		transcription?: string;
 		url: string;
-		recordings: { name: string; url: string }[];
 	}
 
-	let { name, url, recordings }: RecordingTileProps = $props();
+	let { deleteRecording, id, name, url, transcription }: RecordingTileProps = $props();
 	let isPlaying = $state(false);
 	let waveformContainer: HTMLElement;
 	let wavesurfer: WaveSurfer;
@@ -47,7 +49,7 @@
 	}
 </script>
 
-<div class="recording-tile">
+<div class="recording-tile" {id}>
 	<h3>{name}</h3>
 
 	<div bind:this={waveformContainer}></div>
@@ -57,19 +59,12 @@
 
 		<Button kind="secondary" download={name} href={url} label="Download"></Button>
 
-		<Button
-			kind="danger"
-			onclick={() => {
-				if (confirm('Do you want to delete this recording?')) {
-					recordings.splice(
-						recordings.findIndex((r) => r.name === name),
-						1
-					);
-				}
-			}}
-			label="Delete"
-		/>
+		<Button kind="danger" onclick={async () => await deleteRecording()} label="Delete" />
 	</div>
+
+	{#if transcription}
+		{transcription}
+	{/if}
 </div>
 
 <style>
@@ -98,8 +93,4 @@
 			}
 		}
 	}
-
-	/* div[bind:this='waveformContainer'] {
-		width: 100%;
-	} */
 </style>

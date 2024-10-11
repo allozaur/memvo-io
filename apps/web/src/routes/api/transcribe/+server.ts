@@ -3,11 +3,17 @@ import OpenAI from 'openai';
 import type { RequestHandler } from './$types';
 import { env as envPrivate } from '$env/dynamic/private';
 
-const openai = new OpenAI({
-	apiKey: envPrivate.OPENAI_API_KEY || ''
-});
+const openai = envPrivate.OPENAI_API_KEY
+	? new OpenAI({
+			apiKey: envPrivate.OPENAI_API_KEY
+		})
+	: undefined;
 
 export const POST: RequestHandler = async ({ request }) => {
+	if (!openai) {
+		return error(500, 'OpenAI API key not provided');
+	}
+
 	try {
 		const data = await request.formData();
 		const audioFile = data.get('audio') as File;

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
 	import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
@@ -9,8 +11,6 @@
 	import ButtonPlay from './ButtonPlay.svelte';
 	import ButtonRecord from './ButtonRecord.svelte';
 	import ButtonStop from './ButtonStop.svelte';
-	import { page } from '$app/stores';
-	import { invalidate } from '$app/navigation';
 
 	interface RecorderProps {
 		scrollingWaveform?: boolean;
@@ -126,50 +126,49 @@
 
 	async function saveRecording() {
 		if (recordingUrl) {
+			const fileName = `${new Date().toISOString()}-${crypto.randomUUID()}.webm`;
 			const response = await fetch(recordingUrl);
 			const blob = await response.blob();
 			const userId = $page.data.user?.id;
 
-			if (userId) {
-				const fileName = `${new Date().toISOString()}-${crypto.randomUUID()}.webm`;
-				const filePath = `${userId}/${fileName}`;
-
-				const { error: uploadError } = await $page.data.supabase.storage
-					.from('user_recordings_audio_files')
-					.upload(filePath, blob, {
-						contentType: 'audio/webm'
-					});
-
-				if (uploadError) {
-					console.error('Error uploading file:', uploadError.message);
-					return;
-				}
-
-				const transcription = 'Transcription text here';
-
-				const { error: insertError } = await $page.data.supabase.from('user_recordings').insert([
-					{
-						id: crypto.randomUUID(),
-						created_at: new Date().toISOString(),
-						user_id: userId,
-						audio_file_name: fileName,
-						transcription: transcription
-					}
-				]);
-
-				if (insertError) {
-					console.error('Error inserting record into database:', insertError.message);
-					return;
-				}
-
-				progress = '00:00';
-				recordingUrl = '';
-				wavesurfer.empty();
-
-				await invalidate('get_user_recordings');
-			} else {
+			if (!userId) {
 				alert('You must be logged in to save recordings');
+				return;
 			}
+
+			const { error: uploadError } = await $page.data.supabase.storage
+				.from('user_recordings_audio_files')
+				.upload(`${userId}/${fileName}`, blob, {
+					contentType: 'audio/webm'
+				});
+
+			if (uploadError) {
+				console.error('Error uploading file:', uploadError.message);
+				return;
+			}
+
+			const transcription = 'Transcription text here';
+
+			const { error: insertError } = await $page.data.supabase.from('user_recordings').insert([
+				{
+					id: crypto.randomUUID(),
+					created_at: new Date().toISOString(),
+					user_id: userId,
+					audio_file_name: fileName,
+					transcription: transcription
+				}
+			]);
+
+			if (insertError) {
+				console.error('Error inserting record into database:', insertError.message);
+				return;
+			}
+
+			progress = '00:00';
+			recordingUrl = '';
+			wavesurfer.empty();
+
+			await invalidate('get_user_recordings');
 		}
 	}
 

@@ -63,7 +63,9 @@
 	</div>
 
 	{#if transcription}
-		{transcription}
+		<div class="transcription">
+			{transcription}
+		</div>
 	{/if}
 </div>
 
@@ -83,14 +85,21 @@
 
 	.actions {
 		padding: 1rem;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(max(10rem, calc((100vw - 4rem) / 3)), 1fr));
+		display: flex;
 		gap: 1rem;
 
 		@media (width < 768px) {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(max(10rem, calc((100vw - 4rem) / 3)), 1fr));
+
 			:global(.button):first-child {
 				grid-column: 1 / -1;
 			}
 		}
+	}
+
+	.transcription {
+		display: inline-flex;
+		padding: 1rem;
 	}
 </style>

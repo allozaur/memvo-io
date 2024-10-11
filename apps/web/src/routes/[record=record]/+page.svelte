@@ -6,19 +6,22 @@
 
 	async function deleteRecording(id: string, user_id: string, audio_file_name: string) {
 		if (confirm('Are you sure you want to delete this recording?')) {
-			const { error: storageError } = await $page.data.supabase.storage
+			const { error: storageRemoveError } = await $page.data.supabase.storage
 				.from('user_recordings_audio_files')
 				.remove([`${user_id}/${audio_file_name}`]);
 
-			if (storageError) {
-				console.error('Storage error:', storageError);
+			if (storageRemoveError) {
+				console.error('Storage error:', storageRemoveError);
 				return;
 			}
 
-			const { error } = await $page.data.supabase.from('user_recordings').delete().eq('id', id);
+			const { error: dbDeleteError } = await $page.data.supabase
+				.from('user_recordings')
+				.delete()
+				.eq('id', id);
 
-			if (error) {
-				console.error('Database error:', error);
+			if (dbDeleteError) {
+				console.error('Database error:', dbDeleteError);
 			} else {
 				invalidate('get_user_recordings');
 			}
@@ -32,7 +35,7 @@
 	{#if $page.data.recordings.length}
 		<section class="recordings">
 			<ul>
-				{#each $page.data.recordings as { id, name, transcription, url, user_id }}
+				{#each $page.data.recordings as { id, name, transcription, url, user_id } (id)}
 					<li>
 						<RecordingTile
 							deleteRecording={async () => {

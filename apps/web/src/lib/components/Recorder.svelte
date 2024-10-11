@@ -68,6 +68,10 @@
 
 		record.on('record-progress', (time: number) => {
 			updateProgress(time);
+
+			if (time > 60000) {
+				stopRecording();
+			}
 		});
 	}
 
@@ -154,7 +158,9 @@
 				return;
 			}
 
-			const transcription = 'Transcription text here';
+			const transcription = await getTranscriptionFromBackend(blob);
+
+			console.log('Transcription:', transcription);
 
 			const { error: insertError } = await $page.data.supabase.from('user_recordings').insert([
 				{
@@ -176,6 +182,28 @@
 			wavesurfer.empty();
 
 			await invalidate('get_user_recordings');
+		}
+	}
+
+	async function getTranscriptionFromBackend(audioBlob: Blob): Promise<string | null> {
+		try {
+			const formData = new FormData();
+			formData.append('audio', audioBlob, 'audio.webm');
+
+			const response = await fetch('/api/transcribe', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				throw new Error('Error in transcription request');
+			}
+
+			const result = await response.text();
+			return result;
+		} catch (error) {
+			console.error('Error fetching transcription:', error);
+			return null;
 		}
 	}
 
@@ -223,7 +251,7 @@
 				</div>
 
 				<div class="recording-actions">
-					<Button label="Save recording" onclick={saveRecording} />
+					<Button label="Save & transcribe recording" onclick={saveRecording} />
 
 					<Button kind="danger" label="Delete recording" onclick={deleteRecording} />
 				</div>

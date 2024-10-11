@@ -67,6 +67,14 @@
 
 	<div bind:this={waveformContainer}></div>
 
+	{#if transcription}
+		<div class="transcription">
+			<div class="inner">
+				{transcription}
+			</div>
+		</div>
+	{/if}
+
 	<div class="actions">
 		<Button
 			kind="primary"
@@ -87,17 +95,11 @@
 
 		<Button kind="danger" onclick={async () => await deleteRecording()} label="Delete" />
 	</div>
-
-	{#if transcription}
-		<div class="transcription">
-			{transcription}
-		</div>
-	{/if}
 </div>
 
 <style>
 	.recording-tile {
-		background: var(--c-body-dark);
+		background: var(--bg-body-dark);
 		color: var(--c-text);
 		display: grid;
 		gap: 1rem;
@@ -124,7 +126,16 @@
 	}
 
 	.transcription {
-		display: inline-flex;
 		padding: 1rem;
+
+		.inner {
+			padding: 1rem;
+			background: var(--bg-surface-3);
+			display: inline-flex;
+			margin-top: 1rem;
+			font-size: 1.25rem;
+			font-family: 'Crimson Text', serif;
+			color: var(--c-text);
+		}
 	}
 </style>

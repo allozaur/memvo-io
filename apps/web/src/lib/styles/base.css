@@ -1,7 +1,7 @@
 body {
 	margin: 0;
 	color: var(--c-text);
-	background-color: var(--c-body);
+	background-color: var(--bg-body);
 	font-family: 'Plus Jakarta Sans', sans-serif;
 	font-optical-sizing: auto;
 	font-weight: <weight>;

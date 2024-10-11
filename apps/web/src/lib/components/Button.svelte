@@ -93,7 +93,7 @@
 	}
 
 	.primary {
-		--background-preset: var(--c-surface-2);
+		--background-preset: var(--bg-surface-2);
 		color: var(--c-text);
 	}
 
@@ -103,7 +103,7 @@
 	}
 
 	.secondary {
-		--background-preset: var(--c-surface-1);
+		--background-preset: var(--bg-surface-1);
 		color: var(--c-text);
 	}
 </style>

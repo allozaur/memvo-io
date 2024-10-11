@@ -50,6 +50,12 @@
 			backend: 'MediaElement'
 		});
 
+		wavesurfer.on('finish', () => {
+			if (recordingUrl) {
+				wavesurfer.load(recordingUrl);
+			}
+		});
+
 		record = wavesurfer.registerPlugin(
 			RecordPlugin.create({ scrollingWaveform, renderRecordedAudio: true })
 		);
@@ -80,6 +86,7 @@
 
 	async function stopPlayback() {
 		wavesurfer.stop();
+		wavesurfer.load(recordingUrl);
 	}
 
 	async function startRecording() {

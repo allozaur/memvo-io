@@ -52,7 +52,6 @@
 
 		wavesurfer.on('finish', () => {
 			isPlaying = false;
-			// createWaveSurfer();
 
 			wavesurfer.load(url);
 		});

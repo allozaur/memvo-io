@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 import { env as envPrivate } from '$env/dynamic/private';
 
 const openai = new OpenAI({
-	apiKey: envPrivate.OPENAI_API_KEY
+	apiKey: envPrivate.OPENAI_API_KEY || ''
 });
 
 export const POST: RequestHandler = async ({ request }) => {

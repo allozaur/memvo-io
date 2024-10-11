@@ -16,7 +16,7 @@
 	let isPlaying = $state(false);
 	let waveformContainer: HTMLElement;
 	let wavesurfer: WaveSurfer;
-	let waveColor = $state(
+	let progressColor = $state(
 		browser && window.matchMedia('(prefers-color-scheme: dark)').matches
 			? '#ffffff'
 			: browser && window.matchMedia('(prefers-color-scheme: light)').matches
@@ -24,29 +24,43 @@
 				: ''
 	);
 
-	onMount(() => {
+	function createWaveSurfer() {
+		if (wavesurfer) {
+			wavesurfer.destroy(); // Clean up any previous instance
+		}
+
 		wavesurfer = WaveSurfer.create({
 			container: waveformContainer,
-			waveColor,
-			progressColor: '#ddd',
-			cursorColor: '#ddd',
+			waveColor: '#ccc',
+			progressColor,
+			cursorColor: progressColor,
 			height: 100,
 			barWidth: 2,
 			barRadius: 3,
-			backend: 'MediaElement'
+			backend: 'MediaElement' // Ensures browser-native audio handling
 		});
 
-		// Load audio from the URL
 		wavesurfer.load(url);
 
-		// Cleanup the wavesurfer instance when the component is destroyed
-		return () => wavesurfer.destroy();
-	});
+		wavesurfer.on('play', () => {
+			isPlaying = true;
+		});
 
-	function togglePlay() {
-		wavesurfer.playPause();
-		isPlaying = !isPlaying;
+		wavesurfer.on('pause', () => {
+			isPlaying = false;
+		});
+
+		wavesurfer.on('finish', () => {
+			isPlaying = false;
+			// createWaveSurfer();
+
+			wavesurfer.load(url);
+		});
 	}
+
+	onMount(() => {
+		createWaveSurfer(); // Initialize wavesurfer on component mount
+	});
 </script>
 
 <div class="recording-tile" {id}>
@@ -55,7 +69,20 @@
 	<div bind:this={waveformContainer}></div>
 
 	<div class="actions">
-		<Button kind="primary" onclick={togglePlay} label={isPlaying ? 'Pause' : 'Play'} />
+		<Button
+			kind="primary"
+			onclick={() => wavesurfer.playPause()}
+			label={isPlaying ? 'Pause' : 'Play'}
+		/>
+
+		<Button
+			kind="primary"
+			onclick={() => {
+				wavesurfer.stop();
+				createWaveSurfer();
+			}}
+			label="Stop"
+		/>
 
 		<Button kind="secondary" download={name} href={url} label="Download"></Button>
 
@@ -73,7 +100,6 @@
 	.recording-tile {
 		background: var(--c-body-dark);
 		color: var(--c-text);
-		/* padding: 1rem; */
 		display: grid;
 		gap: 1rem;
 		align-items: start;

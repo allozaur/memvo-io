@@ -25,7 +25,7 @@
 	let progress = $state('00:00');
 	let record: RecordPlugin = $state({} as RecordPlugin);
 	let recordingUrl = $state('');
-	let waveColor = $state(
+	let progressColor = $state(
 		browser && window.matchMedia('(prefers-color-scheme: dark)').matches
 			? '#ffffff'
 			: browser && window.matchMedia('(prefers-color-scheme: light)').matches
@@ -41,9 +41,9 @@
 
 		wavesurfer = WaveSurfer.create({
 			container: '#wave',
-			waveColor,
-			progressColor: '#ddd',
-			cursorColor: '#ddd',
+			waveColor: '#eee',
+			progressColor,
+			cursorColor: progressColor,
 			height: 100,
 			barWidth: 2,
 			barRadius: 3,

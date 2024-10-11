@@ -29,6 +29,15 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Record | Memvo — Share or publish recordings with transcriptions</title>
+
+	<meta
+		name="description"
+		content="Instant recordings 🔴 with transcriptions 📝 that you can publish 📤 to Google Docs."
+	/>
+</svelte:head>
+
 <main>
 	<Recorder />
 

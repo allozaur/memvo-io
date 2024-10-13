@@ -41,7 +41,7 @@
 <main>
 	<Recorder />
 
-	{#if $page.data.recordings.length}
+	{#if $page.data.recordings?.length}
 		<section class="recordings">
 			<ul>
 				{#each $page.data.recordings as { id, name, transcription, url, user_id } (id)}

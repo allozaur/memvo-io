@@ -9,9 +9,10 @@
 	import ButtonPlay from './ButtonPlay.svelte';
 	import ButtonRecord from './ButtonRecord.svelte';
 	import ButtonStop from './ButtonStop.svelte';
+	import formatProgressTime from '$lib/utils/format-progress-time';
 
 	interface RecorderProps {
-		deleteRecording: () => void;
+		discardRecording: () => void;
 		recordingBlob?: Blob | MediaSource;
 		recordingFileName?: string;
 		recordingUrl?: string;
@@ -20,9 +21,7 @@
 	}
 
 	let {
-		deleteRecording,
-		recordingBlob = $bindable(),
-		recordingFileName = $bindable(''),
+		discardRecording,
 		recordingUrl = $bindable(''),
 		saveRecording,
 		scrollingWaveform = true
@@ -76,7 +75,7 @@
 		});
 
 		record.on('record-progress', (time: number) => {
-			updateProgress(time);
+			progress = formatProgressTime(time);
 
 			if (time > 60000) {
 				stopRecording();
@@ -84,29 +83,34 @@
 		});
 	}
 
-	async function handleDeleteRecording() {
-		if (recordingUrl) {
-			deleteRecording();
+	function resetRecorder() {
+		progress = '00:00';
+		recordingUrl = '';
+		wavesurfer.empty();
+	}
 
-			progress = '00:00';
-			wavesurfer.empty();
+	async function handleDiscardRecording() {
+		if (!recordingUrl) {
+			alert('No recording to discard');
+			return;
 		}
+
+		discardRecording();
+		resetRecorder();
 	}
 
 	async function handleSaveRecording() {
-		saveRecording();
+		if (!recordingUrl) {
+			alert('No recording to save');
+			return;
+		}
 
-		progress = '00:00';
-		wavesurfer.empty();
+		saveRecording();
+		resetRecorder();
 	}
 
 	async function startPlayback() {
 		wavesurfer.playPause();
-	}
-
-	async function stopPlayback() {
-		wavesurfer.stop();
-		wavesurfer.load(recordingUrl);
 	}
 
 	async function startRecording() {
@@ -133,6 +137,11 @@
 		});
 	}
 
+	async function stopPlayback() {
+		wavesurfer.stop();
+		wavesurfer.load(recordingUrl);
+	}
+
 	function stopRecording() {
 		record.stopRecording();
 
@@ -151,84 +160,79 @@
 		}
 	}
 
-	function updateProgress(time: number) {
-		const formattedTime = [
-			Math.floor((time % 3600000) / 60000), // minutes
-			Math.floor((time % 60000) / 1000) // seconds
-		]
-			.map((v) => (v < 10 ? '0' + v : v))
-			.join(':');
-		progress = formattedTime;
-	}
-
 	onMount(() => {
 		createWaveSurfer();
+
 		wavesurfer.empty();
 	});
 </script>
 
-<div id="wave"></div>
+<div class="recorder">
+	<div id="wave"></div>
 
-<div class="controls">
-	{#if isRecording}
-		<div class="record">
-			<p id="progress">{progress}</p>
+	<div class="controls">
+		{#if isRecording}
+			<div class="inner">
+				<p id="progress">{progress}</p>
 
-			<div class="controls">
-				{#if isPaused}
-					<ButtonRecord onclick={togglePause} />
-				{:else}
-					<ButtonPause onclick={togglePause} />
-				{/if}
-
-				<ButtonStop onclick={stopRecording} />
-			</div>
-		</div>
-	{:else if isStopped}
-		<div class="record">
-			<p id="progress">{progress}</p>
-			{#if recordingUrl}
 				<div class="controls">
-					<ButtonPlay onclick={startPlayback} />
+					{#if isPaused}
+						<ButtonRecord onclick={togglePause} />
+					{:else}
+						<ButtonPause onclick={togglePause} />
+					{/if}
 
-					<ButtonStop onclick={stopPlayback} />
+					<ButtonStop onclick={stopRecording} />
 				</div>
+			</div>
+		{:else if isStopped}
+			<div class="inner">
+				<p class="progress-time">{progress}</p>
 
-				<div class="recording-actions">
-					<Button label="Save recording" onclick={handleSaveRecording} />
+				{#if recordingUrl}
+					<div class="controls">
+						<ButtonPlay onclick={startPlayback} />
 
-					<Button kind="danger" label="Delete recording" onclick={handleDeleteRecording} />
-				</div>
-			{:else}
-				<ButtonRecord onclick={startRecording} />
+						<ButtonStop onclick={stopPlayback} />
+					</div>
 
-				<span>Press to start recording</span>
-			{/if}
-		</div>
-	{/if}
+					<div class="recording-actions">
+						<Button label="Save recording" onclick={handleSaveRecording} />
+
+						<Button kind="danger" label="Discard recording" onclick={handleDiscardRecording} />
+					</div>
+				{:else}
+					<ButtonRecord onclick={startRecording} />
+
+					<span>Press to start recording</span>
+				{/if}
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style>
+	#wave {
+		width: 100%;
+		transition: all 0.2ms ease-out;
+	}
+
 	.controls {
 		display: flex;
 		gap: 0.75rem;
 	}
 
-	.record {
+	.inner {
 		color: var(--c-text-light);
 		display: grid;
 		justify-items: center;
 		gap: 1rem;
+		width: 100%;
 	}
 
 	.recording-actions {
 		display: flex;
 		gap: 1rem;
 		margin-top: 1rem;
-	}
-
-	#wave {
-		width: 100%;
-		transition: all 0.2ms ease-out;
 	}
 </style>

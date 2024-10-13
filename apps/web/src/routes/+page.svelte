@@ -14,10 +14,10 @@
 		name: string;
 		url: string;
 		transcription?: string;
-		data: string; // Base64 data for storage
+		data: string;
 	}[] = $state.raw([]);
 
-	async function deleteRecording() {
+	async function discardRecording() {
 		if (!recordingUrl) return alert('No recording to delete');
 
 		URL.revokeObjectURL(recordingUrl);
@@ -34,61 +34,27 @@
 
 		const base64Data = await blobToBase64(recordingBlob);
 
-		const newRecording = {
-			id: recordingFileName,
-			name: recordingFileName,
-			data: base64Data,
-			transcription: '',
-			url: URL.createObjectURL(recordingBlob)
-		};
-
-		savedRecordings = [newRecording, ...savedRecordings];
-
-		localStorage.setItem(
-			'savedRecordings',
-			JSON.stringify(
-				savedRecordings.map(({ id, name, data, transcription }) => ({
-					id,
-					name,
-					data,
-					transcription
-				}))
-			)
-		);
+		savedRecordings = [
+			{
+				id: recordingFileName,
+				name: recordingFileName,
+				data: base64Data,
+				transcription: '',
+				url: URL.createObjectURL(recordingBlob)
+			},
+			...savedRecordings
+		];
 	}
 
-	function deleteSavedRecording(id: string) {
+	function deleteRecording(id: string) {
 		if (confirm('Are you sure you want to delete this recording?')) {
-			const recordingIndex = savedRecordings.findIndex((rec) => rec.id === id);
-			if (recordingIndex !== -1) {
-				const recording = savedRecordings[recordingIndex];
-				URL.revokeObjectURL(recording.url);
-
-				savedRecordings.splice(recordingIndex, 1);
-
-				savedRecordings = savedRecordings.filter((rec) => rec.id !== id);
-
-				localStorage.setItem(
-					'savedRecordings',
-					JSON.stringify(
-						savedRecordings.map(({ id, name, data, transcription }) => ({
-							id,
-							name,
-							data,
-							transcription
-						}))
-					)
-				);
-			}
+			savedRecordings = savedRecordings.filter((rec) => rec.id !== id);
 		}
 	}
 
 	onMount(() => {
-		const savedData = localStorage.getItem('savedRecordings');
-
-		if (savedData) {
-			const recordings = JSON.parse(savedData);
-			savedRecordings = recordings.map(
+		if (localStorage.getItem('savedRecordings')) {
+			savedRecordings = JSON.parse(`${localStorage.getItem('savedRecordings')}`).map(
 				(rec: { id: string; name: string; data: string; transcription?: string }) => {
 					const blob = base64ToBlob(rec.data);
 					const url = URL.createObjectURL(blob);
@@ -100,6 +66,24 @@
 						url
 					};
 				}
+			);
+		}
+	});
+
+	$effect(() => {
+		if (savedRecordings) {
+			console.log('savedRecordings:', savedRecordings);
+
+			localStorage.setItem(
+				'savedRecordings',
+				JSON.stringify(
+					savedRecordings.map(({ id, name, data, transcription }) => ({
+						id,
+						name,
+						data,
+						transcription
+					}))
+				)
 			);
 		}
 	});
@@ -128,13 +112,7 @@
 			</p>
 		</div>
 
-		<Recorder
-			{deleteRecording}
-			bind:recordingBlob
-			bind:recordingFileName
-			bind:recordingUrl
-			{saveRecording}
-		/>
+		<Recorder {discardRecording} bind:recordingUrl {saveRecording} />
 
 		{#if savedRecordings.length > 0}
 			<section class="recordings">
@@ -147,7 +125,8 @@
 								name={recording.name}
 								url={recording.url}
 								transcription={recording.transcription}
-								deleteRecording={async () => await deleteSavedRecording(recording.id)}
+								deleteRecording={() => deleteRecording(recording.id)}
+								bind:savedRecordings
 							/>
 						</li>
 					{/each}
@@ -162,7 +141,6 @@
 		display: grid;
 		gap: 2.5rem;
 		padding-block: 2.5rem;
-		place-items: center;
 		text-align: center;
 
 		@media (width >= 768px) {
@@ -175,6 +153,7 @@
 		gap: 1rem;
 		padding: 1.5rem;
 		margin-bottom: 3rem;
+		place-self: center;
 	}
 
 	.hero p {

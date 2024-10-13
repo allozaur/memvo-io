@@ -3,17 +3,27 @@
 	import WaveSurfer from 'wavesurfer.js';
 	import Button from './Button.svelte';
 	import { browser } from '$app/environment';
+	import transcribeRecording from '$lib/methods/transcribe-recording';
 
 	interface RecordingTileProps {
 		blob: Blob;
-		deleteRecording: () => Promise<void>;
+		deleteRecording: () => void;
 		id: string;
 		name: string;
+		savedRecordings?: any[];
 		transcription?: string;
 		url: string;
 	}
 
-	let { blob, deleteRecording, id, name, url, transcription }: RecordingTileProps = $props();
+	let {
+		blob,
+		deleteRecording,
+		id,
+		name,
+		savedRecordings = $bindable([]),
+		transcription,
+		url
+	}: RecordingTileProps = $props();
 	let isPlaying = $state(false);
 	let waveformContainer: HTMLElement;
 	let wavesurfer: WaveSurfer;
@@ -58,30 +68,6 @@
 		});
 	}
 
-	async function transcribeRecording(audioBlob: Blob): Promise<{ text: string } | null> {
-		try {
-			const formData = new FormData();
-			const newBlob = new Blob([audioBlob], { type: 'audio/webm' });
-			formData.append('audio', newBlob, 'audio.webm');
-
-			const response = await fetch('/api/transcribe', {
-				method: 'POST',
-				body: formData
-			});
-
-			if (!response.ok) {
-				throw new Error('Error in transcription request');
-			}
-
-			const result = await response.json();
-
-			return result;
-		} catch (error) {
-			console.error('Error fetching transcription:', error);
-			return null;
-		}
-	}
-
 	onMount(() => {
 		createWaveSurfer();
 	});
@@ -106,8 +92,20 @@
 				kind="secondary"
 				label="Transcribe"
 				onclick={async () => {
+					if (!savedRecordings) {
+						return;
+					}
+
 					const transcriptionResult = await transcribeRecording(blob);
 					transcription = transcriptionResult ? transcriptionResult.text : '';
+
+					savedRecordings = savedRecordings.map((rec) => {
+						if (rec.id === id) {
+							rec.transcription = transcription;
+						}
+
+						return rec;
+					});
 				}}
 			/>
 		</div>

@@ -158,9 +158,8 @@
 				return;
 			}
 
-			const transcription = await getTranscriptionFromBackend(blob);
-
-			console.log('Transcription:', transcription);
+			const transcriptionResult = await getTranscriptionFromBackend(blob);
+			const transcription = transcriptionResult ? transcriptionResult.text : '';
 
 			const { error: insertError } = await $page.data.supabase.from('user_recordings').insert([
 				{
@@ -185,7 +184,7 @@
 		}
 	}
 
-	async function getTranscriptionFromBackend(audioBlob: Blob): Promise<string | null> {
+	async function getTranscriptionFromBackend(audioBlob: Blob): Promise<{ text: string } | null> {
 		try {
 			const formData = new FormData();
 			const newBlob = new Blob([audioBlob], { type: 'audio/webm' });
@@ -200,7 +199,8 @@
 				throw new Error('Error in transcription request');
 			}
 
-			const result = await response.text();
+			const result = await response.json();
+
 			return result;
 		} catch (error) {
 			console.error('Error fetching transcription:', error);

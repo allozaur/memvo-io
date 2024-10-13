@@ -5,6 +5,7 @@
 	import { browser } from '$app/environment';
 	import transcribeRecording from '$lib/methods/transcribe-recording';
 	import LoadingSpinner from './LoadingSpinner.svelte';
+	import type { Transcription } from '$lib/types';
 
 	interface RecordingTileProps {
 		blob: Blob;
@@ -12,8 +13,7 @@
 		id: string;
 		name: string;
 		savedRecordings?: any[];
-		transcription?: string;
-		url: string;
+		transcription?: Transcription;
 	}
 
 	let {
@@ -22,11 +22,13 @@
 		id,
 		name,
 		savedRecordings = $bindable([]),
-		transcription,
-		url
+		transcription
 	}: RecordingTileProps = $props();
 	let isPlaying = $state(false);
 	let isTranscribing = $state(false);
+
+	const recordingUrl = URL.createObjectURL(blob);
+
 	let waveformContainer: HTMLElement;
 	let wavesurfer: WaveSurfer;
 	let progressColor = $state(
@@ -53,7 +55,7 @@
 			backend: 'MediaElement' // Ensures browser-native audio handling
 		});
 
-		wavesurfer.load(url);
+		wavesurfer.load(recordingUrl);
 
 		wavesurfer.on('play', () => {
 			isPlaying = true;
@@ -66,7 +68,7 @@
 		wavesurfer.on('finish', () => {
 			isPlaying = false;
 
-			wavesurfer.load(url);
+			wavesurfer.load(recordingUrl);
 		});
 	}
 
@@ -83,7 +85,7 @@
 	{#if transcription}
 		<div class="transcription">
 			<div class="inner">
-				{transcription}
+				{transcription.text}
 			</div>
 		</div>
 	{:else}
@@ -105,9 +107,7 @@
 
 						isTranscribing = true;
 
-						const transcriptionResult = await transcribeRecording(blob);
-
-						transcription = transcriptionResult ? transcriptionResult.text : '';
+						const transcription = await transcribeRecording(blob);
 
 						isTranscribing = false;
 
@@ -140,7 +140,7 @@
 			label="Stop"
 		/>
 
-		<Button kind="secondary" download={name} href={url} label="Download"></Button>
+		<Button kind="secondary" download={name} href={recordingUrl} label="Download"></Button>
 
 		<Button kind="danger" onclick={async () => await deleteRecording()} label="Delete" />
 	</div>

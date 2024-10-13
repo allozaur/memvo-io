@@ -3,88 +3,32 @@
 	import RecordingTile from '$lib/components/RecordingTile.svelte';
 	import { onMount } from 'svelte';
 	import base64ToBlob from '$lib/utils/base64-to-blob';
-	import blobToBase64 from '$lib/utils/blob-to-base64';
+	import type { Transcription } from '$lib/types';
+	import createRecording from '$lib/methods/create-recording';
 
-	let recordingBlob: Blob | MediaSource | undefined = $state();
-	let recordingFileName = $state('');
 	let recordingUrl = $state('');
 
 	let savedRecordings: {
+		data: string;
 		id: string;
 		name: string;
-		url: string;
-		transcription?: string;
-		data: string;
+		transcription?: Transcription;
 	}[] = $state.raw([]);
-
-	async function discardRecording() {
-		if (!recordingUrl) return alert('No recording to delete');
-
-		URL.revokeObjectURL(recordingUrl);
-		recordingUrl = '';
-	}
-
-	async function saveRecording() {
-		if (!recordingUrl) return alert('No recording to save');
-
-		const response = await fetch(recordingUrl);
-		recordingBlob = await response.blob();
-		recordingFileName = `${new Date().toISOString()}-${crypto.randomUUID()}.webm`;
-		recordingUrl = '';
-
-		const base64Data = await blobToBase64(recordingBlob);
-
-		savedRecordings = [
-			{
-				id: recordingFileName,
-				name: recordingFileName,
-				data: base64Data,
-				transcription: '',
-				url: URL.createObjectURL(recordingBlob)
-			},
-			...savedRecordings
-		];
-	}
-
-	function deleteRecording(id: string) {
-		if (confirm('Are you sure you want to delete this recording?')) {
-			savedRecordings = savedRecordings.filter((rec) => rec.id !== id);
-		}
-	}
 
 	onMount(() => {
 		if (localStorage.getItem('savedRecordings')) {
-			savedRecordings = JSON.parse(`${localStorage.getItem('savedRecordings')}`).map(
-				(rec: { id: string; name: string; data: string; transcription?: string }) => {
-					const blob = base64ToBlob(rec.data);
-					const url = URL.createObjectURL(blob);
-					return {
-						id: rec.id,
-						name: rec.name,
-						data: rec.data,
-						transcription: rec.transcription,
-						url
-					};
-				}
-			);
+			savedRecordings = JSON.parse(`${localStorage.getItem('savedRecordings')}`);
 		}
 	});
 
 	$effect(() => {
 		if (savedRecordings) {
-			console.log('savedRecordings:', savedRecordings);
-
-			localStorage.setItem(
+			console.log(
 				'savedRecordings',
-				JSON.stringify(
-					savedRecordings.map(({ id, name, data, transcription }) => ({
-						id,
-						name,
-						data,
-						transcription
-					}))
-				)
+				savedRecordings.map((x) => x.transcription)
 			);
+
+			localStorage.setItem('savedRecordings', JSON.stringify(savedRecordings));
 		}
 	});
 </script>
@@ -106,26 +50,40 @@
 				<br />
 				<strong>It's that simple.</strong>
 			</h1>
-
-			<!-- <p>
-				The easiest way to instantly get your ideas, interviews and conversations to Google Docs.
-			</p> -->
 		</div>
 
-		<Recorder {discardRecording} bind:recordingUrl {saveRecording} />
+		<Recorder
+			discardRecording={() => {
+				URL.revokeObjectURL(recordingUrl);
+				recordingUrl = '';
+			}}
+			saveRecording={async () => {
+				if (!recordingUrl) return alert('No recording to save');
+
+				const newRecording = await createRecording(recordingUrl);
+
+				recordingUrl = '';
+
+				savedRecordings = [newRecording, ...savedRecordings];
+			}}
+			bind:recordingUrl
+		/>
 
 		{#if savedRecordings.length > 0}
 			<section class="recordings">
 				<ul>
-					{#each savedRecordings as recording (recording.id)}
+					{#each savedRecordings as recording ((recording.id, recording.transcription))}
 						<li>
 							<RecordingTile
 								blob={base64ToBlob(recording.data)}
+								deleteRecording={() => {
+									if (confirm('Are you sure you want to delete this recording?')) {
+										savedRecordings = savedRecordings.filter((r) => r.id !== recording.id);
+									}
+								}}
 								id={recording.id}
 								name={recording.name}
-								url={recording.url}
 								transcription={recording.transcription}
-								deleteRecording={() => deleteRecording(recording.id)}
 								bind:savedRecordings
 							/>
 						</li>
@@ -159,11 +117,6 @@
 			margin-bottom: 3rem;
 			padding: 1.5rem;
 		}
-	}
-
-	.hero p {
-		font-size: 1.125rem;
-		line-height: 1.5;
 	}
 
 	h1 {

@@ -90,11 +90,11 @@
 </script>
 
 <svelte:head>
-	<title>Memvo — Share or publish recordings with transcriptions</title>
+	<title>Memvo — Easily share recordings with transcriptions</title>
 
 	<meta
 		name="description"
-		content="Instant recordings 🔴 with transcriptions 📝 that you can publish 📤 to Google Docs."
+		content="Instant recordings 🔴 with transcriptions 📝 that you can share 📤."
 	/>
 </svelte:head>
 
@@ -102,14 +102,14 @@
 	<div class="hero">
 		<div class="text">
 			<h1>
-				Record, transcribe and publish.
+				Record, transcribe and share.
 				<br />
 				<strong>It's that simple.</strong>
 			</h1>
 
-			<p>
+			<!-- <p>
 				The easiest way to instantly get your ideas, interviews and conversations to Google Docs.
-			</p>
+			</p> -->
 		</div>
 
 		<Recorder {discardRecording} bind:recordingUrl {saveRecording} />
@@ -139,7 +139,7 @@
 <style>
 	.hero {
 		display: grid;
-		gap: 2.5rem;
+		gap: 4rem;
 		padding-block: 2.5rem;
 		text-align: center;
 
@@ -150,10 +150,15 @@
 
 	.hero .text {
 		display: grid;
-		gap: 1rem;
-		padding: 1.5rem;
-		margin-bottom: 3rem;
+		padding: 0 1rem;
+		gap: 0.5rem;
 		place-self: center;
+
+		@media (width >= 768px) {
+			gap: 1rem;
+			margin-bottom: 3rem;
+			padding: 1.5rem;
+		}
 	}
 
 	.hero p {

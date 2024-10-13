@@ -4,6 +4,7 @@
 	import Button from './Button.svelte';
 	import { browser } from '$app/environment';
 	import transcribeRecording from '$lib/methods/transcribe-recording';
+	import LoadingSpinner from './LoadingSpinner.svelte';
 
 	interface RecordingTileProps {
 		blob: Blob;
@@ -25,6 +26,7 @@
 		url
 	}: RecordingTileProps = $props();
 	let isPlaying = $state(false);
+	let isTranscribing = $state(false);
 	let waveformContainer: HTMLElement;
 	let wavesurfer: WaveSurfer;
 	let progressColor = $state(
@@ -86,28 +88,39 @@
 		</div>
 	{:else}
 		<div class="transcribe-cta">
-			<span> You haven't transcribed this recording yet. </span>
+			{#if isTranscribing}
+				<LoadingSpinner --size="1.5rem" />
 
-			<Button
-				kind="secondary"
-				label="Transcribe"
-				onclick={async () => {
-					if (!savedRecordings) {
-						return;
-					}
+				<span> Transcription in progress... </span>
+			{:else}
+				<span> You haven't transcribed this recording yet. </span>
 
-					const transcriptionResult = await transcribeRecording(blob);
-					transcription = transcriptionResult ? transcriptionResult.text : '';
-
-					savedRecordings = savedRecordings.map((rec) => {
-						if (rec.id === id) {
-							rec.transcription = transcription;
+				<Button
+					kind="secondary"
+					label="Transcribe"
+					onclick={async () => {
+						if (!savedRecordings) {
+							return;
 						}
 
-						return rec;
-					});
-				}}
-			/>
+						isTranscribing = true;
+
+						const transcriptionResult = await transcribeRecording(blob);
+
+						transcription = transcriptionResult ? transcriptionResult.text : '';
+
+						isTranscribing = false;
+
+						savedRecordings = savedRecordings.map((rec) => {
+							if (rec.id === id) {
+								rec.transcription = transcription;
+							}
+
+							return rec;
+						});
+					}}
+				/>
+			{/if}
 		</div>
 	{/if}
 
@@ -164,6 +177,7 @@
 
 	.transcription {
 		padding: 1rem;
+		display: inline-grid;
 
 		.inner {
 			padding: 1rem;
@@ -179,7 +193,7 @@
 	.transcribe-cta {
 		display: grid;
 		padding: 1rem;
-		gap: 1rem;
+		gap: 1.25rem;
 		place-items: center;
 	}
 </style>

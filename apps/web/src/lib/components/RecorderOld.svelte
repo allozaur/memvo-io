@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
 	import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
@@ -11,22 +13,10 @@
 	import ButtonStop from './ButtonStop.svelte';
 
 	interface RecorderProps {
-		deleteRecording: () => void;
-		recordingBlob?: Blob | MediaSource;
-		recordingFileName?: string;
-		recordingUrl?: string;
-		saveRecording: () => void;
 		scrollingWaveform?: boolean;
 	}
 
-	let {
-		deleteRecording,
-		recordingBlob = $bindable(),
-		recordingFileName = $bindable(''),
-		recordingUrl = $bindable(''),
-		saveRecording,
-		scrollingWaveform = true
-	}: RecorderProps = $props();
+	let { scrollingWaveform = true }: RecorderProps = $props();
 
 	let defaultDeviceId: string | undefined = $state(undefined);
 	let isPaused = $state(false);
@@ -34,6 +24,7 @@
 	let isStopped = $state(false);
 	let progress = $state('00:00');
 	let record: RecordPlugin = $state({} as RecordPlugin);
+	let recordingUrl = $state('');
 	let progressColor = $state(
 		browser && window.matchMedia('(prefers-color-scheme: dark)').matches
 			? '#ffffff'
@@ -84,20 +75,13 @@
 		});
 	}
 
-	async function handleDeleteRecording() {
+	async function deleteRecording() {
 		if (recordingUrl) {
-			deleteRecording();
-
+			URL.revokeObjectURL(recordingUrl);
+			recordingUrl = '';
 			progress = '00:00';
 			wavesurfer.empty();
 		}
-	}
-
-	async function handleSaveRecording() {
-		saveRecording();
-
-		progress = '00:00';
-		wavesurfer.empty();
 	}
 
 	async function startPlayback() {
@@ -151,6 +135,79 @@
 		}
 	}
 
+	async function saveRecording() {
+		if (recordingUrl) {
+			const fileName = `${new Date().toISOString()}-${crypto.randomUUID()}.webm`;
+			const response = await fetch(recordingUrl);
+			const blob = await response.blob();
+			const userId = $page.data.user?.id;
+
+			if (!userId) {
+				alert('You must be logged in to save recordings');
+				return;
+			}
+
+			const { error: uploadError } = await $page.data.supabase.storage
+				.from('user_recordings_audio_files')
+				.upload(`${userId}/${fileName}`, blob, {
+					contentType: 'audio/webm'
+				});
+
+			if (uploadError) {
+				console.error('Error uploading file:', uploadError.message);
+				return;
+			}
+
+			const transcriptionResult = await getTranscriptionFromBackend(blob);
+			const transcription = transcriptionResult ? transcriptionResult.text : '';
+
+			const { error: insertError } = await $page.data.supabase.from('user_recordings').insert([
+				{
+					id: crypto.randomUUID(),
+					created_at: new Date().toISOString(),
+					user_id: userId,
+					audio_file_name: fileName,
+					transcription: transcription
+				}
+			]);
+
+			if (insertError) {
+				console.error('Error inserting record into database:', insertError.message);
+				return;
+			}
+
+			progress = '00:00';
+			recordingUrl = '';
+			wavesurfer.empty();
+
+			await invalidate('get_user_recordings');
+		}
+	}
+
+	async function getTranscriptionFromBackend(audioBlob: Blob): Promise<{ text: string } | null> {
+		try {
+			const formData = new FormData();
+			const newBlob = new Blob([audioBlob], { type: 'audio/webm' });
+			formData.append('audio', newBlob, 'audio.webm');
+
+			const response = await fetch('/api/transcribe', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				throw new Error('Error in transcription request');
+			}
+
+			const result = await response.json();
+
+			return result;
+		} catch (error) {
+			console.error('Error fetching transcription:', error);
+			return null;
+		}
+	}
+
 	function updateProgress(time: number) {
 		const formattedTime = [
 			Math.floor((time % 3600000) / 60000), // minutes
@@ -195,9 +252,9 @@
 				</div>
 
 				<div class="recording-actions">
-					<Button label="Save recording" onclick={handleSaveRecording} />
+					<Button label="Save & transcribe recording" onclick={saveRecording} />
 
-					<Button kind="danger" label="Delete recording" onclick={handleDeleteRecording} />
+					<Button kind="danger" label="Delete recording" onclick={deleteRecording} />
 				</div>
 			{:else}
 				<ButtonRecord onclick={startRecording} />

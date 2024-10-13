@@ -17,10 +17,6 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: 'No audio file provided' }, { status: 400 });
 		}
 
-		console.log('Audio file type:', audioFile.type);
-		console.log('Audio file size:', audioFile.size, audioFile.name);
-		console.log('Audio file name:', audioFile.name);
-
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), 60000);
 

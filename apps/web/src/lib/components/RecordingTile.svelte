@@ -5,6 +5,7 @@
 	import { browser } from '$app/environment';
 
 	interface RecordingTileProps {
+		blob: Blob;
 		deleteRecording: () => Promise<void>;
 		id: string;
 		name: string;
@@ -12,7 +13,7 @@
 		url: string;
 	}
 
-	let { deleteRecording, id, name, url, transcription }: RecordingTileProps = $props();
+	let { blob, deleteRecording, id, name, url, transcription }: RecordingTileProps = $props();
 	let isPlaying = $state(false);
 	let waveformContainer: HTMLElement;
 	let wavesurfer: WaveSurfer;
@@ -57,8 +58,32 @@
 		});
 	}
 
+	async function transcribeRecording(audioBlob: Blob): Promise<{ text: string } | null> {
+		try {
+			const formData = new FormData();
+			const newBlob = new Blob([audioBlob], { type: 'audio/webm' });
+			formData.append('audio', newBlob, 'audio.webm');
+
+			const response = await fetch('/api/transcribe', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				throw new Error('Error in transcription request');
+			}
+
+			const result = await response.json();
+
+			return result;
+		} catch (error) {
+			console.error('Error fetching transcription:', error);
+			return null;
+		}
+	}
+
 	onMount(() => {
-		createWaveSurfer(); // Initialize wavesurfer on component mount
+		createWaveSurfer();
 	});
 </script>
 
@@ -72,6 +97,19 @@
 			<div class="inner">
 				{transcription}
 			</div>
+		</div>
+	{:else}
+		<div class="transcribe-cta">
+			<span> You haven't transcribed this recording yet. </span>
+
+			<Button
+				kind="secondary"
+				label="Transcribe"
+				onclick={async () => {
+					const transcriptionResult = await transcribeRecording(blob);
+					transcription = transcriptionResult ? transcriptionResult.text : '';
+				}}
+			/>
 		</div>
 	{/if}
 
@@ -108,6 +146,7 @@
 
 	h3 {
 		padding: 1rem;
+		justify-self: start;
 	}
 
 	.actions {
@@ -137,5 +176,12 @@
 			font-family: 'Crimson Text', serif;
 			color: var(--c-text);
 		}
+	}
+
+	.transcribe-cta {
+		display: grid;
+		padding: 1rem;
+		gap: 1rem;
+		place-items: center;
 	}
 </style>

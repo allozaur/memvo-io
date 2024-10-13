@@ -188,7 +188,8 @@
 	async function getTranscriptionFromBackend(audioBlob: Blob): Promise<string | null> {
 		try {
 			const formData = new FormData();
-			formData.append('audio', audioBlob, 'audio.webm');
+			const newBlob = new Blob([audioBlob], { type: 'audio/webm' });
+			formData.append('audio', newBlob, 'audio.webm');
 
 			const response = await fetch('/api/transcribe', {
 				method: 'POST',

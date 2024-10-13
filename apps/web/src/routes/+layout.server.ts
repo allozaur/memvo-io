@@ -1,11 +1,11 @@
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({
-	depends,
-	locals: { safeGetSession, supabase },
-	cookies
-}) => {
-	const { session, user } = await safeGetSession();
+export const load: LayoutServerLoad = async ({ depends, locals: { supabase }, cookies }) => {
+	const {
+		data: { user }
+	} = await supabase.auth.getUser();
+
+	if (!user) return { cookies: cookies.getAll() };
 
 	depends('get_user_recordings');
 
@@ -42,7 +42,6 @@ export const load: LayoutServerLoad = async ({
 	return {
 		cookies: cookies.getAll(),
 		recordings: recordingsWithSignedUrls,
-		session,
 		user
 	};
 };

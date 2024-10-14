@@ -1,12 +1,16 @@
-import { error, json, text } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env as envPrivate } from '$env/dynamic/private';
 
 const CLOUDFLARE_API_URL = `https://api.cloudflare.com/client/v4/accounts/${envPrivate.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/openai/whisper`;
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
 	if (!envPrivate.CLOUDFLARE_WORKERS_AI_API_TOKEN || !envPrivate.CLOUDFLARE_ACCOUNT_ID) {
 		return error(500, 'Cloudflare API credentials not provided');
+	}
+
+	if (request.headers.get('origin') !== url.origin) {
+		return error(403, 'Forbidden');
 	}
 
 	try {

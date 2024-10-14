@@ -9,13 +9,6 @@ export const GET: RequestHandler = async () => {
       <changefreq>monthly</changefreq>
       <priority>1.0</priority>
     </url>
-    
-    <url>
-      <loc>https://memvo.io/record</loc>
-      <lastmod>2024-10-10</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>1.0</priority>
-    </url>
   </urlset>`;
 
 	return new Response(sitemap, {

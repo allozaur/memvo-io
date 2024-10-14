@@ -1,86 +1,62 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
-	import Button from './Button.svelte';
-	import { browser } from '$app/environment';
+	import Button from '../Button.svelte';
 	import transcribeRecording from '$lib/methods/transcribe-recording';
-	import LoadingSpinner from './LoadingSpinner.svelte';
-	import type { Transcription } from '$lib/types';
-
-	interface RecordingTileProps {
-		blob: Blob;
-		deleteRecording: () => void;
-		id: string;
-		name: string;
-		savedRecordings?: any[];
-		transcription?: Transcription;
-	}
+	import LoadingSpinner from '../LoadingSpinner.svelte';
+	import type { RecordingTileProps } from './RecordingTile';
+	import RecordingWave from '../RecordingWave/RecordingWave.svelte';
+	import base64ToBlob from '$lib/utils/base64-to-blob';
 
 	let {
-		blob,
+		data,
 		deleteRecording,
 		id,
 		name,
 		savedRecordings = $bindable([]),
+		titleSlot,
 		transcription
 	}: RecordingTileProps = $props();
+
+	let blob: Blob = $state(base64ToBlob(data));
+
 	let isPlaying = $state(false);
+
 	let isTranscribing = $state(false);
 
-	const recordingUrl = URL.createObjectURL(blob);
+	let recordingUrl = $state(URL.createObjectURL(blob));
 
-	let waveformContainer: HTMLElement;
-	let wavesurfer: WaveSurfer;
-	let progressColor = $state(
-		browser && window.matchMedia('(prefers-color-scheme: dark)').matches
-			? '#ffffff'
-			: browser && window.matchMedia('(prefers-color-scheme: light)').matches
-				? '#000000'
-				: ''
-	);
-
-	function createWaveSurfer() {
-		if (wavesurfer) {
-			wavesurfer.destroy(); // Clean up any previous instance
-		}
-
-		wavesurfer = WaveSurfer.create({
-			container: waveformContainer,
-			waveColor: '#ccc',
-			progressColor,
-			cursorColor: progressColor,
-			height: 100,
-			barWidth: 2,
-			barRadius: 3,
-			backend: 'MediaElement' // Ensures browser-native audio handling
-		});
-
-		wavesurfer.load(recordingUrl);
-
-		wavesurfer.on('play', () => {
-			isPlaying = true;
-		});
-
-		wavesurfer.on('pause', () => {
-			isPlaying = false;
-		});
-
-		wavesurfer.on('finish', () => {
-			isPlaying = false;
-
-			wavesurfer.load(recordingUrl);
-		});
-	}
+	let wavesurfer: WaveSurfer | undefined = $state(undefined);
 
 	onMount(() => {
-		createWaveSurfer();
+		if (wavesurfer) {
+			wavesurfer.on('play', () => {
+				isPlaying = true;
+			});
+
+			wavesurfer.on('pause', () => {
+				isPlaying = false;
+			});
+
+			wavesurfer.on('finish', () => {
+				isPlaying = false;
+			});
+		}
 	});
 </script>
 
 <div class="recording-tile" {id}>
-	<h3>{name}</h3>
+	{#if titleSlot}
+		<h3>
+			{@render titleSlot()}
+		</h3>
+	{:else if name}
+		<h3>
+			{name}
+		</h3>
+	{/if}
 
-	<div bind:this={waveformContainer}></div>
+	<RecordingWave {data} bind:wavesurfer />
 
 	{#if transcription?.text && transcription.text !== `Empty ${id}`}
 		<div class="transcription">
@@ -127,22 +103,23 @@
 	<div class="actions">
 		<Button
 			kind="primary"
-			onclick={() => wavesurfer.playPause()}
+			onclick={() => wavesurfer?.playPause()}
 			label={isPlaying ? 'Pause' : 'Play'}
 		/>
 
 		<Button
 			kind="primary"
 			onclick={() => {
-				wavesurfer.stop();
-				createWaveSurfer();
+				wavesurfer?.stop();
 			}}
 			label="Stop"
 		/>
 
 		<Button kind="secondary" download={name} href={recordingUrl} label="Download"></Button>
 
-		<Button kind="danger" onclick={() => deleteRecording()} label="Delete" />
+		{#if deleteRecording}
+			<Button kind="danger" onclick={() => deleteRecording()} label="Delete" />
+		{/if}
 	</div>
 </div>
 

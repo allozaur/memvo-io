@@ -1,6 +1,5 @@
 <script>
 	import { page } from '$app/stores';
-	import RecordingTile from '$lib/components/RecordingTile.svelte';
 </script>
 
 <svelte:head>
@@ -9,18 +8,6 @@
 
 <main>
 	<h1>Hello, {$page.data?.session?.user?.user_metadata.name}</h1>
-
-	<section>
-		<h2>Your recordings</h2>
-
-		<ul>
-			{#each $page.data.recordings as { id, name, transcription, url }}
-				<li>
-					<RecordingTile {id} {name} {transcription} {url} recordings={$page.data.recordings} />
-				</li>
-			{/each}
-		</ul>
-	</section>
 </main>
 
 <style>

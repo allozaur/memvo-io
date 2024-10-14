@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Recorder from '$lib/components/Recorder.svelte';
-	import RecordingTile from '$lib/components/RecordingTile.svelte';
+	import RecordingTile from '$lib/components/RecordingTile/RecordingTile.svelte';
 	import { onMount } from 'svelte';
-	import base64ToBlob from '$lib/utils/base64-to-blob';
 	import type { Transcription } from '$lib/types';
 	import createRecording from '$lib/methods/create-recording';
 	import { openDB } from 'idb';
@@ -94,8 +93,14 @@
 				<ul>
 					{#each savedRecordings as recording ((recording.id, recording.transcription))}
 						<li>
+							{#snippet titleSlot()}
+								<a href="/recording/{recording.id}" style="text-decoration: none; color: inherit;">
+									{recording.name}
+								</a>
+							{/snippet}
+
 							<RecordingTile
-								blob={base64ToBlob(recording.data)}
+								data={recording.data}
 								deleteRecording={async () => {
 									if (confirm('Are you sure you want to delete this recording?')) {
 										savedRecordings = savedRecordings.filter((r) => r.id !== recording.id);
@@ -106,6 +111,7 @@
 								id={recording.id}
 								name={recording.name}
 								transcription={recording.transcription}
+								{titleSlot}
 								bind:savedRecordings
 							/>
 						</li>

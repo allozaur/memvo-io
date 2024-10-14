@@ -5,6 +5,9 @@
 	import base64ToBlob from '$lib/utils/base64-to-blob';
 	import type { Transcription } from '$lib/types';
 	import createRecording from '$lib/methods/create-recording';
+	import { openDB } from 'idb';
+
+	let db: any;
 
 	let recordingUrl = $state('');
 
@@ -15,20 +18,37 @@
 		transcription?: Transcription;
 	}[] = $state.raw([]);
 
-	onMount(() => {
-		if (localStorage.getItem('savedRecordings')) {
-			savedRecordings = JSON.parse(`${localStorage.getItem('savedRecordings')}`);
-		}
+	async function deleteRecordingFromDB(id: string) {
+		const tx = db.transaction('recordings', 'readwrite');
+		const store = tx.objectStore('recordings');
+
+		await store.delete(id);
+	}
+
+	onMount(async () => {
+		db = await openDB('MemvoDB', 1, {
+			upgrade(db) {
+				if (!db.objectStoreNames.contains('recordings')) {
+					db.createObjectStore('recordings', {
+						keyPath: 'id'
+					});
+				}
+			}
+		});
+
+		const allRecordings = await db.getAll('recordings');
+
+		savedRecordings = allRecordings || [];
 	});
 
 	$effect(() => {
 		if (savedRecordings) {
-			console.log(
-				'savedRecordings',
-				savedRecordings.map((x) => x.transcription)
-			);
+			const tx = db?.transaction('recordings', 'readwrite');
+			const store = tx?.objectStore('recordings');
 
-			localStorage.setItem('savedRecordings', JSON.stringify(savedRecordings));
+			for (const recording of savedRecordings) {
+				store.put(recording);
+			}
 		}
 	});
 </script>
@@ -76,9 +96,11 @@
 						<li>
 							<RecordingTile
 								blob={base64ToBlob(recording.data)}
-								deleteRecording={() => {
+								deleteRecording={async () => {
 									if (confirm('Are you sure you want to delete this recording?')) {
 										savedRecordings = savedRecordings.filter((r) => r.id !== recording.id);
+
+										await deleteRecordingFromDB(recording.id);
 									}
 								}}
 								id={recording.id}

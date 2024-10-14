@@ -5,7 +5,7 @@ export default async function createRecording(recordingUrl: string): Promise<{
 	id: string;
 	name: string;
 	data: string;
-	transcription: Transcription | undefined;
+	transcription: Transcription;
 }> {
 	const response = await fetch(recordingUrl);
 
@@ -16,6 +16,11 @@ export default async function createRecording(recordingUrl: string): Promise<{
 		id: recordingId,
 		name: `${new Date().toISOString()}-${recordingId}.webm`,
 		data: await blobToBase64(recordingBlob),
-		transcription: undefined
+		transcription: {
+			text: `Empty ${recordingId}`,
+			vtt: '',
+			word_count: 0,
+			words: []
+		}
 	};
 }

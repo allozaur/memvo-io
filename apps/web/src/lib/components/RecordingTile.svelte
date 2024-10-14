@@ -82,7 +82,7 @@
 
 	<div bind:this={waveformContainer}></div>
 
-	{#if transcription}
+	{#if transcription?.text && transcription.text !== `Empty ${id}`}
 		<div class="transcription">
 			<div class="inner">
 				{transcription.text}
@@ -142,7 +142,7 @@
 
 		<Button kind="secondary" download={name} href={recordingUrl} label="Download"></Button>
 
-		<Button kind="danger" onclick={async () => await deleteRecording()} label="Delete" />
+		<Button kind="danger" onclick={() => deleteRecording()} label="Delete" />
 	</div>
 </div>
 

@@ -4,6 +4,7 @@ export default async function transcribeRecording(
 	try {
 		const formData = new FormData();
 		const newBlob = new Blob([audioBlob], { type: 'audio/webm' });
+
 		formData.append('audio', newBlob, 'audio.webm');
 
 		const response = await fetch('/api/transcribe', {

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
 	import { browser } from '$app/environment';
-	import type { RecordingWaveProps } from './RecordingWave.d.ts';
+	import type { RecordingWaveProps } from './types';
 	import base64ToBlob from '$lib/utils/base64-to-blob.js';
 
 	let { data, wavesurfer = $bindable() }: RecordingWaveProps = $props();

@@ -3,9 +3,9 @@
 	import WaveSurfer from 'wavesurfer.js';
 	import Button from '../Button.svelte';
 	import transcribeRecording from '$lib/methods/transcribe-recording';
-	import LoadingSpinner from '../LoadingSpinner.svelte';
-	import type { RecordingTileProps } from './RecordingTile';
-	import RecordingWave from '../RecordingWave/RecordingWave.svelte';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import type { RecordingTileProps } from './types';
+	import RecordingWave from '$lib/components/RecordingWave/RecordingWave.svelte';
 	import base64ToBlob from '$lib/utils/base64-to-blob';
 
 	let {

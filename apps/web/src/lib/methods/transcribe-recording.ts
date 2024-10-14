@@ -7,7 +7,7 @@ export default async function transcribeRecording(
 
 		formData.append('audio', newBlob, 'audio.webm');
 
-		const response = await fetch('/api/transcribe/openai', {
+		const response = await fetch('/api/transcribe', {
 			method: 'POST',
 			body: formData
 		});

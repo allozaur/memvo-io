@@ -171,6 +171,7 @@
 	h3 {
 		padding: 1rem;
 		justify-self: start;
+		text-align: left;
 	}
 
 	.actions {
@@ -196,6 +197,7 @@
 			padding: 1rem;
 			background: var(--bg-surface-3);
 			display: inline-flex;
+			flex-wrap: wrap;
 			margin-top: 1rem;
 			font-size: 1.25rem;
 			font-family: 'Crimson Text', serif;

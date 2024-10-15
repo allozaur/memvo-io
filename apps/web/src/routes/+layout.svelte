@@ -1,11 +1,10 @@
 <script>
-	import { afterNavigate, goto, invalidate } from '$app/navigation';
+	import { afterNavigate, invalidate } from '$app/navigation';
 	import Header from '$lib/components/Header.svelte';
 	import { page } from '$app/stores';
 	import '$lib/styles/index.css';
 	import Button from '$lib/components/Button.svelte';
 	import Logo from '$lib/components/Logo.svelte';
-	import ButtonRecord from '$lib/components/ButtonRecord.svelte';
 
 	export let data;
 

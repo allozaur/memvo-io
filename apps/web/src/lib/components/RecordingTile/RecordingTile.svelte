@@ -28,6 +28,8 @@
 
 	let wavesurfer: WaveSurfer | undefined = $state(undefined);
 
+	let currentTime = $state(0);
+
 	onMount(() => {
 		if (wavesurfer) {
 			wavesurfer.on('play', () => {
@@ -41,8 +43,24 @@
 			wavesurfer.on('finish', () => {
 				isPlaying = false;
 			});
+
+			wavesurfer.on('timeupdate', () => {
+				currentTime = wavesurfer?.getCurrentTime() || 0;
+			});
+
+			wavesurfer.on('audioprocess', () => {
+				currentTime = wavesurfer?.getCurrentTime() || 0;
+			});
 		}
 	});
+
+	function playFromTime(start: number) {
+		if (wavesurfer) {
+			currentTime = start;
+			wavesurfer.setTime(currentTime);
+			wavesurfer.play();
+		}
+	}
 </script>
 
 <div class="recording-tile" {id}>
@@ -58,10 +76,28 @@
 
 	<RecordingWave {data} bind:wavesurfer />
 
-	{#if transcription?.text && transcription.text !== `Empty ${id}`}
+	{#if transcription?.words?.length}
 		<div class="transcription">
 			<div class="inner">
-				{transcription.text}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				{#each transcription.words as { word, start, end }, i}
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<span
+						class="word-wrapper"
+						data-start={start}
+						data-end={end}
+						class:highlight={currentTime >= start && currentTime <= end}
+						class:read={currentTime >= start}
+						onclick={() => playFromTime(start)}
+					>
+						{#if i !== transcription.words.length - 1}
+							<span class="word">{word}</span>&nbsp;
+						{:else}
+							<span class="word">{word}</span>
+						{/if}
+					</span>
+				{/each}
 			</div>
 		</div>
 	{:else}
@@ -172,5 +208,19 @@
 		padding: 1rem;
 		gap: 1.25rem;
 		place-items: center;
+	}
+
+	.word {
+		color: var(--c-text-light);
+		cursor: pointer;
+
+		.read & {
+			color: var(--c-text);
+		}
+
+		.highlight & {
+			color: black;
+			background-color: yellow;
+		}
 	}
 </style>

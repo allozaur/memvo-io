@@ -9,4 +9,5 @@ export interface RecordingTileProps {
 	savedRecordings?: any[];
 	titleSlot?: Snippet;
 	transcription?: Transcription;
+	transcriptionModel?: string;
 }

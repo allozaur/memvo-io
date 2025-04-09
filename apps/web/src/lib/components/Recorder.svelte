@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import WaveSurfer from 'wavesurfer.js';
 	import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
+	import { ElevenLabsClient } from 'elevenlabs';
 
 	import Button from './Button.svelte';
 	import ButtonPause from './ButtonPause.svelte';
@@ -18,13 +19,15 @@
 		recordingUrl?: string;
 		saveRecording: () => void;
 		scrollingWaveform?: boolean;
+		transcriptionModel?: 'elevenlabs-scribe-v1' | 'openai-whisper';
 	}
 
 	let {
 		discardRecording,
 		recordingUrl = $bindable(''),
 		saveRecording,
-		scrollingWaveform = true
+		scrollingWaveform = true,
+		transcriptionModel = 'elevenlabs-scribe-v1'
 	}: RecorderProps = $props();
 
 	let defaultDeviceId: string | undefined = $state(undefined);

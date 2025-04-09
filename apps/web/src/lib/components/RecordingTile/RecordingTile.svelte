@@ -15,8 +15,11 @@
 		name,
 		savedRecordings = $bindable([]),
 		titleSlot,
-		transcription
+		transcription,
+		transcriptionModel = $bindable('elevenlabs-scribe-v1')
 	}: RecordingTileProps = $props();
+
+	$inspect(transcription);
 
 	let blob: Blob = $state(base64ToBlob(data));
 
@@ -80,7 +83,7 @@
 		<div class="transcription">
 			<div class="inner">
 				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				{#each transcription.words as { word, start, end }, i}
+				{#each transcription.words as { word, text, start, end }, i}
 					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<span
@@ -91,11 +94,21 @@
 						class:read={currentTime >= start}
 						onclick={() => playFromTime(start)}
 					>
-						{#if i !== transcription.words.length - 1}
-							<span class="word">{word}</span>&nbsp;
-						{:else}
-							<span class="word">{word}</span>
-						{/if}
+						<span class="word">
+							{#if text}
+								{#if text === ' '}
+									&nbsp;
+								{:else}
+									{text}
+								{/if}
+							{:else if word}
+								{#if i !== transcription.words.length - 1}
+									{word}&nbsp;
+								{:else}
+									{word}
+								{/if}
+							{/if}
+						</span>
 					</span>
 				{/each}
 			</div>
@@ -109,6 +122,11 @@
 			{:else}
 				<span> You haven't transcribed this recording yet. </span>
 
+				<select bind:value={transcriptionModel}>
+					<option value="elevenlabs-scribe-v1">ElevenLabs Scribe v1</option>
+					<option value="openai-whisper">OpenAI Whisper</option>
+				</select>
+
 				<Button
 					kind="secondary"
 					label="Transcribe"
@@ -119,7 +137,7 @@
 
 						isTranscribing = true;
 
-						const transcription = await transcribeRecording(blob);
+						const transcription = await transcribeRecording(blob, transcriptionModel);
 
 						isTranscribing = false;
 
